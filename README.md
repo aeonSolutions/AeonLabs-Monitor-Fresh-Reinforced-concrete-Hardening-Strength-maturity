@@ -22,6 +22,10 @@ Proposed assembly solution utilizes a LiPo 2000mAh battery and is able to monito
 - Temperature sensor proble
   - [DS18b20](https://s.click.aliexpress.com/e/_DnnJJBd) [[Datasheet with sensor specs](https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf)]
 
+
+| ![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Harding-Strength--maturity-/blob/main/designs/battery.png) | ![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Harding-Strength--maturity-/blob/main/designs/enclosure.png) |
+|-------------|------|
+
 ## Pinout 
 To connect a sensor to the smart DAQ follow the convention wire colors:
 - Red for power (max 5.0V DC)  (PWR pin)

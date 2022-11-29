@@ -30,7 +30,7 @@ To connect a sensor to the smart DAQ follow the convention wire colors:
 - Whilte for Data Measurements (SCL pin)
 
 ## Firmware Code
-The firmware C code is freely available and is compatible with Tensilica's Xtensa LX6/7 microprocessors. Files are located in the folder "[Firmware Code](https://github.com/aeonSolutions/openScienceResearch-Smart-DAQ-Device-able-to-Upload-Live-Experimental-Sensor-Data-to-a-Data-Repo/tree/main/Firmware%20Code)".
+The firmware C code is freely available and is compatible with Tensilica's Xtensa LX6/7 microprocessors. Files are located in the folder "[Firmware Code](https://github.com/aeonSolutions/openScienceResearch-Smart-DAQ-Device-able-to-Upload-Live-Experimental-Sensor-Data-to-a-Data-Repo/tree/main/Firmware%20Code)". This firmware code is ready to do concrete maturity sensor measurements and upload measured sensor data to a repository on a Dataverse. For more info see [www.dataverse.org](htttp://www.dataverse.org)
 
 <br>
 

@@ -15,8 +15,6 @@ To program the smart DAQ device for concrete monitoring is necessary a Firmware 
 ![](https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/blob/main/progIDE.png)
 
 <br />
-<br />
-<br />
 
 ### Smart PCB Hardware Specifications 
 The hardware specifications for the 12bit pcb with dimensions of 23.5x43.5mm are the following:
@@ -48,7 +46,6 @@ The hardware specifications for the 12bit pcb with dimensions of 23.5x43.5mm are
 
 Another version of this smart DAQ will be available next December that includes built in a 1.69" LCD TFT IPS display with ability to display LIVE experimental data being collected.. Stay tuned for updates. 
 
-<br>
 <br>
 
  **In real life this smart DAQ is able to:**

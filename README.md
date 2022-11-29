@@ -4,9 +4,8 @@ The smart PCB is a 12bit smart DAQ and cand be downloaded on this [repository](h
 
 
 ## Smart DAQ for LIVE Experimental Data
-This repository holds the firmware C code compatible with Tensilica's Xtensa LX6/7 microprocessors. Files are located in the folder "Firmware Code".
+This repository holds the firmware C code compatible with Tensilica's Xtensa LX6/7 microprocessors. Files are located in the folder "[Firmware Code](https://github.com/aeonSolutions/openScienceResearch-Smart-DAQ-Device-able-to-Upload-Live-Experimental-Sensor-Data-to-a-Data-Repo/tree/main/Firmware%20Code)".
 
-<br>
 <br>
 
 ### Smart PCB desgin and proof of Concept 

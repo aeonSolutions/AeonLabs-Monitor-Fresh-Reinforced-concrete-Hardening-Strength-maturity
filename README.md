@@ -17,10 +17,10 @@ Proposed aseembly solution utilizes a LiPo 2000mAh batetry and is able to monito
 
 *Two sensor options for monitoring:*
 - Temperature and Humidity sensor proble
-  - [SHT30](https://s.click.aliexpress.com/e/_DDNDKHd)
-  - [HY2.0-4P](https://s.click.aliexpress.com/e/_Dn2w7Z1)   
+  - [SHT30](https://s.click.aliexpress.com/e/_DDNDKHd) [[Datasheet](https://sensirion.com/media/documents/EA647515/61641D0C/Sensirion_Humidity_Sensors_SHT3x_Datasheet_analog.pdf)]
+  - [SHT30](https://s.click.aliexpress.com/e/_Dn2w7Z1)   [[Datasheet](https://sensirion.com/media/documents/EA647515/61641D0C/Sensirion_Humidity_Sensors_SHT3x_Datasheet_analog.pdf)]
 - Temperature sensor proble
-  - [DS18b20](https://s.click.aliexpress.com/e/_DnnJJBd)
+  - [DS18b20](https://s.click.aliexpress.com/e/_DnnJJBd) [[Datasheet](https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf)]
 
 ## Pinout 
 To connect a sensor to the smart DAQ follwo the wire colors:

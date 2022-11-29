@@ -4,7 +4,7 @@ The smart PCB is a 12bit smart DAQ. The Kicad project files can be downloaded on
 
 
 ## Smart DAQ for LIVE Experimental Data
-This repository holds the firmware C code compatible with Tensilica's Xtensa LX6/7 microprocessors. Files are located in the folder "[Firmware Code](https://github.com/aeonSolutions/openScienceResearch-Smart-DAQ-Device-able-to-Upload-Live-Experimental-Sensor-Data-to-a-Data-Repo/tree/main/Firmware%20Code)".
+The firmware C code is freely available and is compatible with Tensilica's Xtensa LX6/7 microprocessors. Files are located in the folder "[Firmware Code](https://github.com/aeonSolutions/openScienceResearch-Smart-DAQ-Device-able-to-Upload-Live-Experimental-Sensor-Data-to-a-Data-Repo/tree/main/Firmware%20Code)".
 
 <br>
 

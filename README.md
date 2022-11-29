@@ -24,10 +24,10 @@ Proposed aseembly solution utilizes a LiPo 2000mAh batetry and is able to monito
 
 ## Pinout 
 To connect a sensor to the smart DAQ follwo the wire colors:
-- Red for power (max 5.0V DC) (PWR pin)
-- Black for Graound (GNS pin)
-- Yellow for Data Clock  (SCK pin)
-- Whilte for Data Measurements (SDA pin)
+- Red for power (max 5.0V DC)  (PWR pin)
+- Black for Ground             (GND pin)
+- Yellow for Data Clock        (SDA pin)
+- Whilte for Data Measurements (SCL pin)
 
 ## Firmware Code
 The firmware C code is freely available and is compatible with Tensilica's Xtensa LX6/7 microprocessors. Files are located in the folder "[Firmware Code](https://github.com/aeonSolutions/openScienceResearch-Smart-DAQ-Device-able-to-Upload-Live-Experimental-Sensor-Data-to-a-Data-Repo/tree/main/Firmware%20Code)".

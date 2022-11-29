@@ -12,10 +12,10 @@ The smart PCB is a 12bit smart DAQ. The Kicad project files can be downloaded on
 
 
 *Two sensor options for monitoring:*
-- [Temperature and Humidity sensor proble]()
+- Temperature and Humidity sensor proble
   - [SHT30](https://s.click.aliexpress.com/e/_DDNDKHd)
   - [HY2.0-4P](https://s.click.aliexpress.com/e/_Dn2w7Z1)   
-- [Temperature sensor proble]()
+- Temperature sensor proble
   - [DS18b20](https://s.click.aliexpress.com/e/_DnnJJBd)
 
 ## Firmware Code

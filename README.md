@@ -4,7 +4,7 @@ The smart PCB is a 12bit smart DAQ. The Kicad project files can be downloaded on
 
 Nowadays there are many sensors that can be connected for this monitoring task. The most common for this kind of applications are the Sensorion SHt3x , the Maxim Integrated DS18B20 (see part list below).
 
-Proposed assembly solution utilizes a LiPo 2000mAh battery and is able to monitory, in regular intraday intervals, and send data to a nearby edge server for more than one month without requiring a recharge. Other smart device setup solutions are possible. For instance the one with a LiPo battery is suitable for embbeding the smart device inside the concrete element itself one wants to do monitoring. Is also possible to embbed on the sensor probre into the fresh concrete while the smart DAQ encolsure is placed at the surface of the concrete element. Depending on power availablity the smart DAQ has a built in mciro USB plug able to connect to any USB smartphone or tablet charger. 
+Proposed assembly solution utilizes a LiPo 2000mAh battery and is able to monitory, in regular intraday intervals, and send data to a nearby edge server for more than one month without requiring a recharge. Other smart device setup solutions are possible. For instance the one with a LiPo battery is suitable for embbeding the smart device inside the concrete element itself one wants to do monitoring. Is also possible to embbed on the sensor probre into the fresh concrete while the smart DAQ encolsure is placed at the surface of the concrete element. Depending on power availablity the smart DAQ has a built in micro USB plug able to connect to any USB smartphone or tablet charger. 
 
 <br>
 

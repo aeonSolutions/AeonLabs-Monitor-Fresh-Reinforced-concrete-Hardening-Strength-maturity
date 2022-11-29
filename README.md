@@ -26,7 +26,7 @@ Proposed assembly solution utilizes a LiPo 2000mAh battery and is able to monito
 | ![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Harding-Strength--maturity-/blob/main/designs/battery.png) | ![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Harding-Strength--maturity-/blob/main/designs/enclosure.png) |
 |-------------|------|
 | ![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Harding-Strength--maturity-/blob/main/designs/plastic_probe.png) | ![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Harding-Strength--maturity-/blob/main/designs/temp_probe.png) |
-|-------------|------|
+
 
 ## Pinout 
 To connect a sensor to the smart DAQ follow the convention wire colors:

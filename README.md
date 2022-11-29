@@ -2,8 +2,9 @@
 This repo contains intructions on how to assemble a smart PCB able to monitor Fresh Reinforced concrete Harding to determine concrete maturity and estimate its streght. 
 The smart PCB is a 12bit smart DAQ. The Kicad project files can be downloaded on this [repository](https://github.com/aeonSolutions/openScienceResearch-Smart-DAQ-Device-able-to-Upload-Live-Experimental-Sensor-Data-to-a-Data-Repo). Those who prefer buying already assembled, ready to deploy and do live monitoring at a construction site can buy at my [Tindie store](https://www.tindie.com/stores/aeonlabs/).  
 
+<br>
 
-## Smart DAQ for LIVE Experimental Data
+## Firmware Code
 The firmware C code is freely available and is compatible with Tensilica's Xtensa LX6/7 microprocessors. Files are located in the folder "[Firmware Code](https://github.com/aeonSolutions/openScienceResearch-Smart-DAQ-Device-able-to-Upload-Live-Experimental-Sensor-Data-to-a-Data-Repo/tree/main/Firmware%20Code)".
 
 <br>

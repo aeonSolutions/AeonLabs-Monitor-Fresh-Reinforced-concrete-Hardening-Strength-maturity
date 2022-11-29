@@ -4,6 +4,20 @@ The smart PCB is a 12bit smart DAQ. The Kicad project files can be downloaded on
 
 <br>
 
+## Parts needed to assemble one ready to deploy at any construction site
+
+-  [Electronic Case Enclosure Waterproof Junction Box](https://s.click.aliexpress.com/e/_DCuKwB1)
+-  [3.7V 2000mAh 103450 Lipo Polymer Lithium Rechargeable Battery](https://s.click.aliexpress.com/e/_DDm07rl)
+-  [Micro SH 1.0 2Pin connector](https://s.click.aliexpress.com/e/_DmqVKcj)
+
+
+*Two sensor options for monitoring:*
+- [Temperature and Humidity sensor proble]()
+  - [SHT30](https://s.click.aliexpress.com/e/_DDNDKHd)
+  - [HY2.0-4P](https://s.click.aliexpress.com/e/_Dn2w7Z1)   
+- [Temperature sensor proble]()
+  - [DS18b20](https://s.click.aliexpress.com/e/_DnnJJBd)
+
 ## Firmware Code
 The firmware C code is freely available and is compatible with Tensilica's Xtensa LX6/7 microprocessors. Files are located in the folder "[Firmware Code](https://github.com/aeonSolutions/openScienceResearch-Smart-DAQ-Device-able-to-Upload-Live-Experimental-Sensor-Data-to-a-Data-Repo/tree/main/Firmware%20Code)".
 

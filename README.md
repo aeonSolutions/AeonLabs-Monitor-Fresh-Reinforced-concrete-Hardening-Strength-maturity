@@ -4,7 +4,6 @@ The smart PCB is a 12bit smart DAQ. The Kicad project files can be downloaded on
 
 Proposed aseembly solution utilizes a LiPo 2000mAh batetry and is able to monitory in regular intraday intervals and send data to a nearby edge server for more than one month without requiring a recharge. Nowadays there are many sensors that can be conencted for this monitiring task. The most common for this kind of applications are the Sensorion SHt3x , the DS18B20 and the HY2.0-4P (see part list below).
 
- 
 
 <br>
 
@@ -30,7 +29,7 @@ To connect a sensor to the smart DAQ follow the convention wire colors:
 - Whilte for Data Measurements (SCL pin)
 
 ## Firmware Code
-The firmware C code is freely available and is compatible with Tensilica's Xtensa LX6/7 microprocessors. Files are located in the folder "[Firmware Code](https://github.com/aeonSolutions/openScienceResearch-Smart-DAQ-Device-able-to-Upload-Live-Experimental-Sensor-Data-to-a-Data-Repo/tree/main/Firmware%20Code)". This firmware code is ready to do concrete maturity sensor measurements and upload measured sensor data to a repository on a Dataverse. For more info see [www.dataverse.org](htttp://www.dataverse.org)
+The firmware C code is freely available and is compatible with Tensilica's Xtensa LX6/7 microprocessors. Files are located in the folder "[Firmware Code](https://github.com/aeonSolutions/openScienceResearch-Smart-DAQ-Device-able-to-Upload-Live-Experimental-Sensor-Data-to-a-Data-Repo/tree/main/Firmware%20Code)". This firmware code is ready to do concrete maturity sensor measurements and upload measured sensor data to a repository on a Dataverse. For more info see htttp://www.dataverse.org
 
 <br>
 

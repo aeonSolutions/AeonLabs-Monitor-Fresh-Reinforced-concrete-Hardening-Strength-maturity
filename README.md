@@ -117,8 +117,11 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/blob/main/Smart%20DAQ
 
 <br>
 <br>
+
 ________________________________________________________________________________________________________________
+
 ## [Go back to main catalogue page](https://github.com/aeonSolutions/PCB-Prototyping-Catalogue)
+
 ________________________________________________________________________________________________________________
 
 <br>

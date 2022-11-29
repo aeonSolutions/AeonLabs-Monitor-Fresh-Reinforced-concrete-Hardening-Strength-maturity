@@ -2,6 +2,9 @@
 This repo contains intructions on how to assemble a smart PCB able to monitor Fresh Reinforced concrete Harding to determine concrete maturity and estimate its streght. 
 The smart PCB is a 12bit smart DAQ. The Kicad project files can be downloaded on this [repository](https://github.com/aeonSolutions/openScienceResearch-Smart-DAQ-Device-able-to-Upload-Live-Experimental-Sensor-Data-to-a-Data-Repo). Those who prefer buying already assembled, ready to deploy and do live monitoring at a construction site can buy at my [Tindie store](https://www.tindie.com/stores/aeonlabs/).  
 
+Proposed aseembly solution utilizes a LiPo 2000mAh batetry and is able to monitory in regular intraday intervals for more than one month without requiring a recharge.
+ 
+
 <br>
 
 ## Parts needed to assemble one ready to deploy at any construction site

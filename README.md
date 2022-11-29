@@ -10,7 +10,7 @@ Proposed assembly solution utilizes a LiPo 2000mAh battery and is able to monito
 
 <br>
 
-*This repository is still being updated* Stay tuned !
+**This repository is still being updated** Stay tuned !
 
 <br>
 

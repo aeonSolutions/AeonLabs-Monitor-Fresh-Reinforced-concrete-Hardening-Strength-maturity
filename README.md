@@ -9,6 +9,9 @@ Proposed assembly solution utilizes a LiPo 2000mAh battery and is able to monito
 ![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Harding-Strength--maturity-/blob/main/designs/smartDAQcloseup.jpg)
 
 <br>
+*This repository is still being updated* Stay tuned !
+
+<br>
 
 ## Parts needed to assemble one ready to deploy at any construction site
 

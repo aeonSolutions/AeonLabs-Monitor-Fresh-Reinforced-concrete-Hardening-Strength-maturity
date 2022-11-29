@@ -23,7 +23,7 @@ Proposed aseembly solution utilizes a LiPo 2000mAh batetry and is able to monito
   - [DS18b20](https://s.click.aliexpress.com/e/_DnnJJBd) [[Datasheet with sensor specs](https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf)]
 
 ## Pinout 
-To connect a sensor to the smart DAQ follow the wire colors:
+To connect a sensor to the smart DAQ follow the convention wire colors:
 - Red for power (max 5.0V DC)  (PWR pin)
 - Black for Ground             (GND pin)
 - Yellow for Data Clock        (SDA pin)

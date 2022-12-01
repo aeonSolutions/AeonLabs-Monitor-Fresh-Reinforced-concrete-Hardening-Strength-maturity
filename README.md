@@ -70,7 +70,7 @@ To program the smart DAQ device for concrete monitoring is necessary a Firmware 
 <br />
 
 ### Smart PCB Hardware Specifications 
-The hardware specifications for the 12bit pcb with dimensions of 23.5x43.5mm are the following:
+The hardware specifications for the 12bit pcb with dimensions of 54x48mm are the following:
 
 - QFN 56 Dual Xtensa LX7 Core Processors running up to 240MHz
   -	RISC V ultra-low power co-processor

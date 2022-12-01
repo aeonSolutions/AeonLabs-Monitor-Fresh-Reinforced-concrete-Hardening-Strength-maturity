@@ -28,6 +28,8 @@ Proposed assembly solution utilizes a LiPo 2000mAh battery and is able to monito
 
 <br>
 
+![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/designs/pcb_front.png)
+
 ## Parts needed to assemble one ready to deploy at any construction site
 
 -  [Electronic Case Enclosure Waterproof Junction Box](https://s.click.aliexpress.com/e/_DCuKwB1)
@@ -113,13 +115,10 @@ Another version of this smart DAQ will be available next December that includes 
 <br>
 <br>
 
-## PCB design files
+## PCB Gerber files
 The PCB gerber files are located in the folder "gerber" and are ready to order online on any pcb fabrication store. (PCBWay, AllPCB, Eurocircuits, etc)
 <br>
 <br>
-other open hardware PCB electronics are also available on my PCB catalogue that maybe worth have a look.  The catalogue includes the KiCad project files of similar smart DAQ compatible with the firmware code available on this repository:
-
-https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/blob/main/Smart%20DAQ/README.md
 
 ![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/designs/pcb_front.png)
 ![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/designs/pcb_back.png)

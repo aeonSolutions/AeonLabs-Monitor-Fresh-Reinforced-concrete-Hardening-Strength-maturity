@@ -113,13 +113,8 @@ Another version of this smart DAQ will be available next December that includes 
 <br>
 <br>
 
-## PCB circuit Schematic 
-The PCB circuit schematic is available in PDF located in the folder "PCB Schematic"
-
-https://github.com/aeonSolutions/openScienceResearch-Smart-DAQ-Device-able-to-Upload-Live-Experimental-Sensor-Data-to-a-Data-Repo/tree/main/PCB%20Schematic
-
 ## PCB design files
-The PCB gerber files are located in the folder "PCB Gerber Files" and are ready to order online on any pcb fabrication store. (PCBWay, AllPCB, Eurocircuits, etc)
+The PCB gerber files are located in the folder "gerber" and are ready to order online on any pcb fabrication store. (PCBWay, AllPCB, Eurocircuits, etc)
 <br>
 <br>
 other open hardware PCB electronics are also available on my PCB catalogue that maybe worth have a look.  The catalogue includes the KiCad project files of similar smart DAQ compatible with the firmware code available on this repository:

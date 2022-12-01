@@ -1,0 +1,27 @@
+Drill report for LDAD ATOM PRO.kicad_pcb
+Created on 11/30/2022 10:01:11 AM
+
+Copper Layer Stackup:
+    =============================================================
+    L1 :  F.Cu                      front
+    L2 :  B.Cu                      back
+
+
+Drill file 'LDAD ATOM PRO-PTH.drl' contains
+    plated through holes:
+    =============================================================
+    T1  0.400mm  0.0157"  (123 holes)
+    T2  0.500mm  0.0197"  (4 holes)  (with 4 slots)
+    T3  0.650mm  0.0256"  (12 holes)
+    T4  0.950mm  0.0374"  (7 holes)
+    T5  1.000mm  0.0394"  (2 holes)
+
+    Total plated holes count 148
+
+
+Drill file 'LDAD ATOM PRO-NPTH.drl' contains
+    unplated through holes:
+    =============================================================
+    T1  0.700mm  0.0276"  (5 holes)
+
+    Total unplated holes count 5

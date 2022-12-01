@@ -49,6 +49,7 @@ Proposed assembly solution utilizes a LiPo 2000mAh battery and is able to monito
 |-------------|------|
 | ![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Harding-Strength--maturity-/blob/main/designs/plastic_probe.png) | ![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Harding-Strength--maturity-/blob/main/designs/temp_probe.png) |
 
+<br>
 
 ## Pinout 
 To connect a sensor to the smart DAQ follow the convention wire colors:
@@ -56,6 +57,8 @@ To connect a sensor to the smart DAQ follow the convention wire colors:
 - Black for Ground             (GND pin)
 - Yellow for Data Clock        (SDA pin)
 - Whilte for Data Measurements (SCL pin)
+
+<br>
 
 ## Firmware Code
 Anyone can program a custom firmware code to run on this smart DAQ device able to do fresh concrete LIVE monitoring. 
@@ -93,14 +96,10 @@ The hardware specifications for the 12bit pcb with dimensions of 23.5x43.5mm are
   -  1x I2C pin terminal connector (shared)
   -  1x 12 to 16bit (oversampling & digitization) digital terminal connector (shared)
   -  1x 12 to 16bit (oversampling & digitization) analog terminal connector (shared) with manual scale selection ohmeter via jumper pin
-  -  12 to 16bit (oversampling & digitization) voltage reference analyser with temperature compensation 
+  -  12 to 16bit (oversampling & digitization) voltage reference analyser with temperature compensation
+-  built in a 1.69" LCD TFT IPS display with ability to display LIVE experimental data being collected. 
 
 <br>
-
-**Smart PCB design wiht a built in 1.69" LCD TFT IPS display**
-
-Another version of this smart DAQ will be available next December that includes built in a 1.69" LCD TFT IPS display with ability to display LIVE experimental data being collected.. Stay tuned for updates. 
-
 <br>
 
  **In real life this smart DAQ is able to:**

@@ -8,6 +8,9 @@
 </a>
 ![](https://views.whatilearened.today/views/github/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity.svg)
 
+# How to assemble on smart concrete maturity device
+Check the wiki above for detailed instructions on how to assemble (or order one on Tindie) on smart PCB concrete maturity device. How to install the firmware code and how to use it at any construction site. 
+
 <br />
 
 # AeonLabs Monitor Fresh Reinforced Concrete Hardening/Strength (maturity)
@@ -25,49 +28,6 @@ Proposed assembly solution utilizes a LiPo 2000mAh battery and is able to monito
 
 ![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/designs/pcb_front.png)
 
-## Parts needed to assemble one ready to deploy at any construction site
-
--  [Electronic Case Enclosure Waterproof Junction Box](https://s.click.aliexpress.com/e/_DCuKwB1)
--  [3.7V 2000mAh 103450 Lipo Polymer Lithium Rechargeable Battery](https://s.click.aliexpress.com/e/_DDm07rl)
--  [Micro SH 1.0 2Pin connector](https://s.click.aliexpress.com/e/_DmqVKcj)
-
-
-*Two sensor options for monitoring:*
-- Temperature and Humidity sensor proble
-  - [SHT30 metallic proble](https://s.click.aliexpress.com/e/_DDNDKHd) [[Datasheet with sensor specs](https://sensirion.com/media/documents/EA647515/61641D0C/Sensirion_Humidity_Sensors_SHT3x_Datasheet_analog.pdf)]
-  - [SHT30 platic proble](https://s.click.aliexpress.com/e/_Dn2w7Z1)   [[Datasheet with sensor specs](https://sensirion.com/media/documents/EA647515/61641D0C/Sensirion_Humidity_Sensors_SHT3x_Datasheet_analog.pdf)]
-- Temperature sensor proble
-  - [DS18b20](https://s.click.aliexpress.com/e/_DnnJJBd) [[Datasheet with sensor specs](https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf)]
-
-
-| ![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Harding-Strength--maturity-/blob/main/designs/battery.png) | ![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Harding-Strength--maturity-/blob/main/designs/enclosure.png) |
-|-------------|------|
-| ![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Harding-Strength--maturity-/blob/main/designs/plastic_probe.png) | ![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Harding-Strength--maturity-/blob/main/designs/temp_probe.png) |
-
-<br>
-
-## Pinout 
-To connect a sensor to the smart DAQ follow the convention wire colors:
-- Red for power (max 5.0V DC)  (PWR pin)
-- Black for Ground             (GND pin)
-- Yellow for Data Clock        (SDA pin)
-- Whilte for Data Measurements (SCL pin)
-
-<br>
-
-## Firmware Code
-Anyone can program a custom firmware code to run on this smart DAQ device able to do fresh concrete LIVE monitoring. 
-
-I have available here on Github a firmware C code compatible with Tensilica's Xtensa LX6/7 microprocessors. Files are located in the folder "[Firmware Code](https://github.com/aeonSolutions/openScienceResearch-Smart-DAQ-Device-able-to-Upload-Live-Experimental-Sensor-Data-to-a-Data-Repo/tree/main/Firmware%20Code)". This firmware code is ready to do concrete maturity sensor measurements and upload measured sensor data to a repository on a Dataverse. For more info see [www.dataverse.org](http://www.dataverse.org)
-
-<br>
-
-## Firmware Download / Burner
-To program the smart DAQ device for concrete monitoring is necessary a Firmware downloader device able to download into it a binary program. Anyone can use the PCB available on this repository [AeonLabs-MCU-Burner-USB-to-UART-TTL](https://github.com/aeonSolutions/AeonLabs-MCU-Burner-USB-to-UART-TTL) to fabricate a USB to UART MCU program downloader. Compatible with Arduino Studio, VS Code and Visual Studio programming IDEs (among many others). Those who prefer buying already assembled, ready to deploy and do live monitoring at a construction site can buy at my [Tindie store](https://www.tindie.com/stores/aeonlabs/).  
-
-![](https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/blob/main/progIDE.png)
-
-<br />
 
 ### Smart PCB Hardware Specifications 
 The hardware specifications for the 12bit pcb with dimensions of 54x48mm are the following:

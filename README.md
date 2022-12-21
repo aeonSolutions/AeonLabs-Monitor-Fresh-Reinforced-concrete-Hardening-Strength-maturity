@@ -26,7 +26,12 @@ Proposed assembly solution utilizes a LiPo 2000mAh battery and is able to monito
 <br>
 
 ## How to assemble on smart concrete maturity device
-Check the [wiki](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/wiki) above for detailed instructions on how to assemble (or order one on Tindie) on smart PCB concrete maturity device. How to install the firmware code and how to use it at any construction site. 
+Check the [wiki](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/wiki) above for detailed instructions on:
+
+- how to assemble one smart PCB concrete maturity device
+- How to buy one on Tindie
+- How to install the firmware code
+- How to use it at any construction site. 
 
 <br />
 <br>

@@ -27,8 +27,8 @@ Proposed assembly solution utilizes a LiPo 2000mAh battery and is able to monito
 
 <br>
 
-### Status
-![](https://github.com/aeonSolutions/AeonLabs-WIFI-BLE-RFID-NFC-Desk-Contacless-Reader-Writer/blob/main/designs/working_green.png)  Fully working.
+### ![](https://github.com/aeonSolutions/AeonLabs-WIFI-BLE-RFID-NFC-Desk-Contacless-Reader-Writer/blob/main/designs/working_green.png) Status
+  Fully working.
 
 <br>
 

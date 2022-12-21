@@ -32,6 +32,7 @@ Check the [wiki](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinfor
 - How to buy one on Tindie
 - How to install the firmware code
 - How to use it at any construction site. 
+- & more...
 
 <br />
 <br>

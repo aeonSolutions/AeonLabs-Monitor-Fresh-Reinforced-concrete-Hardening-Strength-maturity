@@ -27,6 +27,11 @@ Proposed assembly solution utilizes a LiPo 2000mAh battery and is able to monito
 
 <br>
 
+### Status
+![](https://github.com/aeonSolutions/AeonLabs-WIFI-BLE-RFID-NFC-Desk-Contacless-Reader-Writer/blob/main/designs/working_green.png)  Fully working.
+
+<br>
+
 ## How to assemble on smart concrete maturity device
 Check the [wiki](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/wiki) above for detailed instructions on:
 

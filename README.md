@@ -8,10 +8,7 @@
 </a>
 ![](https://views.whatilearened.today/views/github/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity.svg)
 
-# How to assemble on smart concrete maturity device
-Check the wiki above for detailed instructions on how to assemble (or order one on Tindie) on smart PCB concrete maturity device. How to install the firmware code and how to use it at any construction site. 
 
-<br />
 
 # AeonLabs Monitor Fresh Reinforced Concrete Hardening/Strength (maturity)
 This repo contains instructions on how to assemble a smart PCB able to monitor Fresh Reinforced concrete Hardening to determine concrete maturity and estimate its strenght. 
@@ -21,13 +18,18 @@ Nowadays there are many sensors that can be connected for this monitoring task. 
 
 This smart device has the ATSHA204A chip a SHA-256 high-security hardware authentication IC for secure and unique data exchange and communication between the smart DAQ and the Edge server.
 
+![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/designs/pcb_front.png)
+
+
 Proposed assembly solution utilizes a LiPo 2000mAh battery and is able to monitory, in regular intraday intervals, and send data to a nearby edge server using WIFI or Bluetooth BLE for more than one month without requiring a recharge. Other smart device setup solutions are possible. For instance the one with a LiPo battery is suitable for embedding the smart device inside the concrete element itself one wants to do monitoring. Is also possible to embed the sensor probe into the fresh concrete while the smart DAQ enclosure is placed at the surface of the concrete element. Depending on power availability the smart DAQ has a built in micro USB plug able to connect to any USB smartphone or tablet charger.
 
 <br>
+
+## How to assemble on smart concrete maturity device
+Check the wiki above for detailed instructions on how to assemble (or order one on Tindie) on smart PCB concrete maturity device. How to install the firmware code and how to use it at any construction site. 
+
+<br />
 <br>
-
-![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/designs/pcb_front.png)
-
 
 ### Smart PCB Hardware Specifications 
 The hardware specifications for the 12bit pcb with dimensions of 54x48mm are the following:
@@ -74,7 +76,6 @@ The PCB gerber files are located in the folder "gerber" and are ready to order o
 <br>
 <br>
 
-![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/designs/pcb_front.png)
 ![](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/designs/pcb_back.png)
 
 <br>

@@ -13,9 +13,11 @@
 # AeonLabs Monitor Fresh Reinforced Concrete Hardening/Strength (maturity)
 
 **The problem**
+
 Currently, there are commercial solutions for this smart device, for instance, [Maturix](https://maturix.com) smart solution and also [Giatech](https://www.giatecscientific.com/products/concrete-sensors/smartrock-maturity-meter/)'s smart solution. Both Cloud-based.  And this is a limitation. 
 
 **The Ideia**
+
 This smart device is able to do active monitoring of fresh concrete at any construction site to determine accurately the concrete strength by the hour. This gives an advantage to a construction site team, as is able to accurately know the exact day the concrete structural element can have formworks removed and this saves time and money. The one available here on GitHub can be customized to function without the need for a cloud server, and instead provide the information on the smart device display only. It can also be configured to do measurements upload to a local server located inside the construction site. 
 
 <br>

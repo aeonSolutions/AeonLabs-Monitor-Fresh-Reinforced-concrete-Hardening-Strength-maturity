@@ -22,10 +22,10 @@ This smart device is able to do active monitoring of fresh concrete at any const
 
 <br>
 
-This repo contains instructions on how to assemble a smart PCB able to monitor Fresh Reinforced concrete Hardening to determine concrete maturity and estimate its strenght. 
-The smart PCB is a 12bit smart DAQ. The Kicad project files can be downloaded on this [repository](https://github.com/aeonSolutions/openScienceResearch-Smart-DAQ-Device-able-to-Upload-Live-Experimental-Sensor-Data-to-a-Data-Repo). Those who prefer buying already assembled, ready to deploy and do live monitoring at a construction site can buy at my [Tindie store](https://www.tindie.com/stores/aeonlabs/).  
+This repo contains instructions on how to assemble a smart PCB able to monitor Fresh Reinforced concrete Hardening to determine concrete maturity and estimate its strength. 
+The smart PCB is a 12-bit smart DAQ. The Kicad project files can be downloaded on this [repository](https://github.com/aeonSolutions/openScienceResearch-Smart-DAQ-Device-able-to-Upload-Live-Experimental-Sensor-Data-to-a-Data-Repo). Those who prefer buying already assembled, ready to deploy and do live monitoring at a construction site can buy at my [Tindie store](https://www.tindie.com/stores/aeonlabs/).  
 
-Nowadays there are many sensors that can be connected for this monitoring task. The most common for this kind of applications are the Sensorion SHt3x , the Maxim Integrated DS18B20 (see part list below).
+Nowadays there are many sensors that can be connected for this monitoring task. The most common for this kind of applications are the Sensorion SHt3x, and the Maxim Integrated DS18B20 (see part list below).
 
 This smart device has the ATSHA204A chip a SHA-256 high-security hardware authentication IC for secure and unique data exchange and communication between the smart DAQ and the Edge server.
 
@@ -33,7 +33,7 @@ This smart device has the ATSHA204A chip a SHA-256 high-security hardware authen
 <img src="https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/designs/smart%20concrete%20maturity%20inside%20transparent%20enclosure.jpeg" height="350">
 </p>
 
-Proposed assembly solution utilizes a LiPo 2000mAh battery and is able to monitory, in regular intraday intervals, and send data to a nearby edge server using WIFI or Bluetooth BLE for more than one month without requiring a recharge. Other smart device setup solutions are possible. For instance the one with a LiPo battery is suitable for embedding the smart device inside the concrete element itself one wants to do monitoring. Is also possible to embed the sensor probe into the fresh concrete while the smart DAQ enclosure is placed at the surface of the concrete element. Depending on power availability the smart DAQ has a built in micro USB plug able to connect to any USB smartphone or tablet charger.
+The proposed assembly solution utilizes a LiPo 2000mAh battery and is able to monitor, in regular intraday intervals, and send data to a nearby edge server using WIFI or Bluetooth BLE for more than one month without requiring a recharge. Other smart device setup solutions are possible. For instance, the one with a LiPo battery is suitable for embedding the smart device inside the concrete element itself one wants to do monitoring. Is also possible to embed the sensor probe into the fresh concrete while the smart DAQ enclosure is placed at the surface of the concrete element. Depending on power availability the smart DAQ has a built-in micro USB plug able to connect to any USB smartphone or tablet charger.
 
 <p align="center">
 <img src="https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/designs/smart%20concrete%20maturity%20inside%20enclosure.jpeg" height="350">

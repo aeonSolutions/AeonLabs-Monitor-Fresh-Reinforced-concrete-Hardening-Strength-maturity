@@ -85,9 +85,7 @@ The hardware specifications for the 12bit pcb with dimensions of 54x48mm are the
 - 	External connectivity:
   -  1x I2C pin terminal connector (shared)
   -  1x 12 to 16bit (oversampling & digitization) digital terminal connector (shared)
-  -  1x 12 to 16bit (oversampling & digitization) analog terminal connector (shared) with manual scale selection ohmeter via jumper pin
-  -  12 to 16bit (oversampling & digitization) voltage reference analyser with temperature compensation
--  built in a 1.69" LCD TFT IPS display with ability to display LIVE experimental data being collected. 
+
 
 <br>
 <br>

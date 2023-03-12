@@ -81,7 +81,7 @@ The hardware specifications for the 12bit pcb with dimensions of 54x48mm are the
   - DFN-8 SHT3.x; temperature sensor with a precision of 1.5C;
   - DFN-8 SHT3.x humidity sensor;
   - LGA-14 LSM6DS3 a 6-axis accelerometer and gyroscope;
-  - reference voltage sessor calibration wiht temperature and humidity
+  - reference voltage sensor calibration with temperature and humidity
 - 	External connectivity:
   -  1x I2C pin terminal connector (shared)
   -  1x 12 to 16bit (oversampling & digitization) digital terminal connector (shared)
@@ -91,6 +91,7 @@ The hardware specifications for the 12bit pcb with dimensions of 54x48mm are the
 <br>
 
  **In real life this smart DAQ is able to:**
+ 
 - Can be powered using a 2 wire LiPo battery with a JST connector or by Micro USB 
 - Connect to all kinds of I2C Temperature and Humidity sensors;
 - Measure voltage in the range of  [0;3.3V]

@@ -10,7 +10,7 @@
 
 
 
-# AeonLabs Monitor Fresh Reinforced Concrete Hardening/Strength (maturity)
+# Smart Concrete Curing Monitoring Device
 
 **The problem**
 

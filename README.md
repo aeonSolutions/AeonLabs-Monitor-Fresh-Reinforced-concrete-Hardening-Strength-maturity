@@ -53,7 +53,7 @@ The proposed assembly solution utilizes a LiPo 2000mAh battery and is able to mo
 ### ![](https://github.com/aeonSolutions/AeonLabs-WIFI-BLE-RFID-NFC-Desk-Contacless-Reader-Writer/blob/main/designs/working_green.png) Status
   Fully working.
 
-[March 24, 2023] - THe firmware 1.0.3 for Over the Air Updates is now released to public. Goto the [releases](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/releases) section to learn more.  
+[March 24, 2023] - The firmware 1.0.3 for Over the Air Updates is now released to public. Goto the [releases](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/releases) section to learn more.  
 
 <br>
 

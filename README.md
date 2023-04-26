@@ -40,12 +40,14 @@ The proposed assembly solution utilizes a LiPo 2000mAh battery and is able to mo
 
 <p align="center">
 <img src="https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/designs/smart%20concrete%20maturity%20inside%20enclosure.jpeg" height="350">
+
+<img src="https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/designs/smart_fresh_concrete_monitoring_device.jpeg" height="350">
 </p>
 
 <br>
 
 <p align="center">
-<img src="https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/designs/smart_fresh_concrete_monitoring_device.jpeg" height="350">
+
 </p>
 
 <br>

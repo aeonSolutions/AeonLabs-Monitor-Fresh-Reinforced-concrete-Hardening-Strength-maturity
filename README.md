@@ -71,6 +71,16 @@ The proposed assembly solution utilizes a LiPo 2000mAh battery and is able to mo
 
 <br>
 
+### Now selling on Tidnie
+
+| [<img src="https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/blob/main/tindie_sell.png" alt="" height="60">](https://www.tindie.com/stores/aeonlabs/) | To all those not into electronics and still liked and want to own any of the listed PCB for smart devices can buy the PRO version on Tindie ready to install and use. |
+|-------------|------|
+
+<br />
+<br />
+
+<br>
+
 ## How to assemble on smart concrete maturity device
 Check the [wiki](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/wiki) above for detailed instructions on:
 

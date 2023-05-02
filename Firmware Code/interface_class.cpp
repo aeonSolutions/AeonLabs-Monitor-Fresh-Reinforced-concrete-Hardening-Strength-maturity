@@ -161,7 +161,7 @@ void INTERFACE_CLASS::init_NTP_Time(char* ntpServer_, long gmtOffset_sec_, int d
 
 // ***************************************************************************
 void INTERFACE_CLASS::sendBLEstring(String message,  uint8_t sendTo ){
-  Serial.println("[APP] Free memory: " + String(esp_get_free_heap_size()) + " bytes");
+  this->mserial->printStrln("[APP] Free memory: " + String(esp_get_free_heap_size()) + " bytes");
 
   if (WiFi.status() == WL_CONNECTED){
     mserial->printStrln("disconnectiong WIFI");
@@ -172,7 +172,8 @@ void INTERFACE_CLASS::sendBLEstring(String message,  uint8_t sendTo ){
   if( message == "")
       message= "empty message found.\n";
 
-  if (sendTo == mSerial::DEBUG_TO_BLE ){
+
+  if ( (sendTo == mSerial::DEBUG_TO_BLE && this->BLE_IS_DEVICE_CONNECTED==true ) || this->BLE_IS_DEVICE_CONNECTED==true ){
     this->mserial->sendBLEstring(message, sendTo);
   }else{
     this->mserial->printStr(message, sendTo);
@@ -335,8 +336,6 @@ bool INTERFACE_CLASS::loadSettings(fs::FS &fs){
 
     this->config.DEVICE_PASSWORD = settingsFile.readStringUntil(';');
     this->config.DEVICE_BLE_NAME = settingsFile.readStringUntil(';');
-  
-
 
   settingsFile.close();
 

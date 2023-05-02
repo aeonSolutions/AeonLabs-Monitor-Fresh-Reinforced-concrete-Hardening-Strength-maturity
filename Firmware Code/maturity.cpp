@@ -47,7 +47,7 @@ MATURITY_CLASS::MATURITY_CLASS(){}
 void MATURITY_CLASS::init(INTERFACE_CLASS* interface, ONBOARD_SENSORS* onBoardSensors, mSerial* mserial, ONBOARD_LED_CLASS* onboardLED){
 
     this->mserial= mserial;
-    this->mserial->printStr("maturity sensor init...");
+    this->mserial->printStr("maturity sensor init on IO " + String(this->EXT_PLUG_DI_IO) + "...");
 
     this->interface=interface;
     this->onBoardSensors=onBoardSensors;
@@ -56,7 +56,7 @@ void MATURITY_CLASS::init(INTERFACE_CLASS* interface, ONBOARD_SENSORS* onBoardSe
     this->onewire = OneWire(this->EXT_PLUG_DI_IO); 
     this->sensors= DallasTemperature(&onewire);    
     this->sensors.begin();    // initialize the DS18B20 sensor
-
+    
     this->last_measured_probe_temp=-1;
     this->last_measured_time_delta=-1;     
     this->DATASET_NUM_SAMPLES=0;
@@ -73,11 +73,6 @@ void MATURITY_CLASS::init(INTERFACE_CLASS* interface, ONBOARD_SENSORS* onBoardSe
 
     this->config.custom_maturity_equation="(p-(-10))*dt";
     this->config.custom_strenght_equation="62*log(m)+21";
-
-    this->onewire = OneWire(this->EXT_PLUG_DI_IO); 
-    this->sensors= DallasTemperature(&onewire);    
-    this->sensors.begin();    // initialize the DS18B20 sensor
-
 
     for(int i=0; i<8 ; i++){
         this->measureValues[i]=0.0;
@@ -108,8 +103,43 @@ void MATURITY_CLASS::init(INTERFACE_CLASS* interface, ONBOARD_SENSORS* onBoardSe
     this->readSettings();
     this->mserial->printStrln("done.\n");
 
+    this->ProbeSensorStatus(mSerial::DEBUG_BOTH_USB_UART);
 }
 
+// ************************************************
+void MATURITY_CLASS::ProbeSensorStatus(uint8_t sendTo){
+
+    String dataStr="";
+
+    dataStr= "the number of Temperature probes is " + String(this->sensors.getDS18Count(), DEC) +"\n";
+
+    // report parasite power requirements
+    dataStr += ("Parasite power is: "); 
+    if (this->sensors.isParasitePowerMode()) dataStr +="ON\n";
+    else dataStr += "OFF\n";
+
+    if (!sensors.getAddress(this->insideThermometer, 0)) dataStr += "Unable to find address for Device 0\n"; 
+
+    this->onewire.reset_search();
+    // assigns the first address found to insideThermometer
+    if (!this->onewire.search(this->insideThermometer)) dataStr += "Unable to find address for insideThermometer\n";
+
+    // show the addresses we found on the bus
+    dataStr += "Device 0 Address: ";
+    for (uint8_t i = 0; i < 8; i++)
+    {
+    if (this->insideThermometer [i] < 16)  this->mserial->printStr("0");
+        dataStr += String(this->insideThermometer[i], HEX) ;
+    }
+
+    // set the resolution to 9 bit (Each Dallas/Maxim device is capable of several different resolutions)
+    this->sensors.setResolution(this->insideThermometer, 9);
+ 
+    dataStr += "\n Device 0 Resolution: ";
+    dataStr += String(this->sensors.getResolution(this->insideThermometer), DEC) + "\n\n"; 
+    
+    this->interface->sendBLEstring( dataStr, sendTo);  
+}
 
 // ********************** for devices with onboard PSRAM *************************************************
 int MATURITY_CLASS::get_dataset_memory_availability(){
@@ -381,7 +411,7 @@ double MATURITY_CLASS::custom_strenght(int pos){
     this->mserial->printStrln("Time diff (s) = " + String(this->last_measured_time_delta) );
 
     this->mserial->printStr(" Requesting temperatures..."); 
-    sensors.requestTemperatures(); // Send the command to get temperature readings 
+    this->sensors.requestTemperatures(); // Send the command to get temperature readings 
     this->mserial->printStrln("DONE"); 
 
     this->DATASET_NUM_SAMPLES = this->DATASET_NUM_SAMPLES+1;
@@ -389,13 +419,18 @@ double MATURITY_CLASS::custom_strenght(int pos){
     this->mserial->printStrln("dataset counter:"+String(DATASET_NUM_SAMPLES)); 
     this->mserial->printStr("Temperature("+String(this->DATASET_NUM_SAMPLES)+") is: "); 
     
-    last_measured_probe_temp=this->sensors.getTempCByIndex(0);
+    this->last_measured_probe_temp = this->sensors.getTempC( this->insideThermometer );
+    if( this->last_measured_probe_temp == DEVICE_DISCONNECTED_C) 
+    {
+        this->mserial->printStrln("Error: Could not read temperature data");
+    }
+
     this->onBoardSensors->request_onBoard_Sensor_Measurements();
     
     // Save data to the dataset file
     this->save_measurment_record(FFat);
 
-    this->mserial->printStr(String(last_measured_probe_temp));
+    this->mserial->printStr(String(this->last_measured_probe_temp));
     this->mserial->printStrln(" ºC");
     
     // __________________________________________________________________________
@@ -547,6 +582,7 @@ bool MATURITY_CLASS::readSettings(fs::FS &fs){
 
     String dataStr="Concrete Curing GBRL Commands:\n" \
                     "$pt                 - view current probe temperature value\n" \
+                    "$probe status       - View Temperature Probe status\n" \
                     "$st                 - view current strength value\n" \
                     "$ma                 - view current maturity value\n" \
                     "$me new             - initialize a new measurements  dataset\n" \
@@ -577,46 +613,51 @@ bool MATURITY_CLASS::gbrl_commands(String $BLE_CMD, uint8_t sendTo){
     String dataStr="";
     long int $timedif;
 
-    if($BLE_CMD=="$st model"){
-        dataStr="Current strenght model:\n";
-        dataStr +=  this->config.custom_strenght_equation + "\n";
-        this->interface->sendBLEstring( dataStr, sendTo);
-        return true;
-    }
-    
-    if($BLE_CMD=="$ma model"){
-        dataStr="Current maturity model:\n";
-        dataStr +=  this->config.custom_maturity_equation + "\n";
-        this->interface->sendBLEstring( dataStr, sendTo);
-        return true;
-    }
-
-    if($BLE_CMD=="$mi"){
-        dataStr="Current measurements interval is " + String(roundFloat(this->config.MEASUREMENT_INTERVAL/(60*1000) ,2)) + String(" min") + String(char(10));
-        this->interface->sendBLEstring( dataStr, sendTo);
-        return true;
-    }
-
-
-    if( $BLE_CMD=="$pt"){
+    if( $BLE_CMD == "$pt"){
         this->sensors.requestTemperatures(); // Send the command to get temperature readings     
         this->last_measured_probe_temp=this->sensors.getTempCByIndex(0);
         dataStr="Current temperature measured is " + String(roundFloat(this->last_measured_probe_temp ,2))+String(char(176))+String("C") + String(char(10));
         this->interface->sendBLEstring( dataStr, sendTo);
         return true;
     }
-    if( $BLE_CMD=="$ma"){
+
+    if ($BLE_CMD == "$probe status"){
+        this->ProbeSensorStatus(sendTo);
+        return true;
+    }
+
+    if($BLE_CMD == "$st model"){
+        dataStr="Current strenght model:\n";
+        dataStr +=  this->config.custom_strenght_equation + "\n";
+        this->interface->sendBLEstring( dataStr, sendTo);
+        return true;
+    }
+    
+    if($BLE_CMD == "$ma model"){
+        dataStr="Current maturity model:\n";
+        dataStr +=  this->config.custom_maturity_equation + "\n";
+        this->interface->sendBLEstring( dataStr, sendTo);
+        return true;
+    }
+
+    if($BLE_CMD == "$mi"){
+        dataStr="Current measurements interval is " + String(roundFloat(this->config.MEASUREMENT_INTERVAL/(60*1000) ,2)) + String(" min") + String(char(10));
+        this->interface->sendBLEstring( dataStr, sendTo);
+        return true;
+    }
+
+    if( $BLE_CMD == "$ma"){
         dataStr="Current maturity value is " + String(roundFloat(this->custom_maturity(this->DATASET_NUM_SAMPLES),2)) + String(char(176)) + String("C.h  ") + String(char(10));     
         this->interface->sendBLEstring( dataStr, sendTo);
         return true;
     }
-    if( $BLE_CMD=="$st"){
+    if( $BLE_CMD == "$st"){
         dataStr= "Current Strenght value is  "+ String(roundFloat(this->custom_strenght(this->DATASET_NUM_SAMPLES),2))+" Mpa" + String(char(10));    
         this->interface->sendBLEstring( dataStr, sendTo);
         return true;
     }
 
-    if( $BLE_CMD=="$me status"){
+    if( $BLE_CMD == "$me status"){
         if( this->interface->Measurments_EN == false){
             dataStr = String("Measurements not started\n\n");
         } else{
@@ -627,7 +668,7 @@ bool MATURITY_CLASS::gbrl_commands(String $BLE_CMD, uint8_t sendTo){
         this->interface->sendBLEstring( dataStr, sendTo); 
         return true;
     }
-    if( $BLE_CMD=="$me new"){
+    if( $BLE_CMD == "$me new"){
         this->interface->Measurments_NEW=true;
         this->interface->Measurments_EN=false;
         this->DATASET_NUM_SAMPLES=0;
@@ -635,7 +676,7 @@ bool MATURITY_CLASS::gbrl_commands(String $BLE_CMD, uint8_t sendTo){
         this->interface->sendBLEstring( dataStr, sendTo); 
         return true;
     }
-    if($BLE_CMD=="$me start"){
+    if($BLE_CMD == "$me start"){
         if (this->interface->Measurments_EN){
             dataStr = "Measurments already Started on " + this->interface->measurement_Start_Time + "\n\n";
         }else{

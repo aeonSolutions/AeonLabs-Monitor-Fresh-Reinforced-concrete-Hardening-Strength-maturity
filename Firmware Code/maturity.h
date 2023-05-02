@@ -105,7 +105,9 @@ Where,
       String selected_menu;
       String selected_sub_menu;
       
-    DallasTemperature sensors;
+   DallasTemperature sensors;
+   DeviceAddress insideThermometer;
+
     uint8_t EXT_PLUG_DI_IO;
 
     bool hasNewMeasurementValues;
@@ -121,7 +123,8 @@ Where,
     MATURITY_CLASS();
 
     void init(INTERFACE_CLASS* interface, ONBOARD_SENSORS* onBoardSensors, mSerial* mserial, ONBOARD_LED_CLASS* onboardLED);
-    
+    void ProbeSensorStatus(uint8_t sendTo);
+
     int get_dataset_size();
     int get_dataset_memory_availability();   
     bool reinitialize_dataset_file(fs::FS &fs);

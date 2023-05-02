@@ -166,6 +166,7 @@ String valueReceived="";
 class MyServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
       interface->BLE_IS_DEVICE_CONNECTED = true;
+      mserial->BLE_IS_DEVICE_CONNECTED = true;
       deviceDisconnected_BLE_callback=false;
       interface->onBoardLED->led[0] = interface->onBoardLED->LED_BLUE;
       interface->onBoardLED->statusLED(100, 1);
@@ -173,6 +174,8 @@ class MyServerCallbacks: public BLEServerCallbacks {
 
     void onDisconnect(BLEServer* pServer) {
       interface->BLE_IS_DEVICE_CONNECTED = false;
+      mserial->BLE_IS_DEVICE_CONNECTED = false;
+      
       interface->onBoardLED->led[0] = interface->onBoardLED->LED_BLUE;
       interface->onBoardLED->statusLED(100, 0.5);
       interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
@@ -185,7 +188,7 @@ class MyServerCallbacks: public BLEServerCallbacks {
 
 class pCharacteristicTX_Callbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
-      mserial->ble=false;
+      mserial->BLE_IS_DEVICE_CONNECTED=false;
       delay(10);
 
       String txValue = String(pCharacteristic->getValue().c_str());
@@ -205,7 +208,7 @@ class pCharacteristicTX_Callbacks: public BLECharacteristicCallbacks {
                     
 class pCharacteristicRX_Callbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
-      mserial->ble=false;
+      mserial->BLE_IS_DEVICE_CONNECTED=false;
       delay(10);
 
       String rxValue = String(pCharacteristic->getValue().c_str());
@@ -217,7 +220,7 @@ class pCharacteristicRX_Callbacks: public BLECharacteristicCallbacks {
       }
       
       $BLE_CMD=rxValue;
-      mserial->ble=true;
+      mserial->BLE_IS_DEVICE_CONNECTED=true;
 
       xSemaphoreTake(MemLockSemaphoreBLE_RX, portMAX_DELAY); 
         newCMDarrived=true; // this needs to be the last line       
@@ -238,7 +241,7 @@ long int prevMeasurementMillis;
 
 void setup() { 
   // Firmware Build Version / revision ______________________________
-  interface->firmware_version="1.0.7";
+  interface->firmware_version="1.0.8";
 
   MemLockSemaphoreBLE_RX = xSemaphoreCreateMutex();
 
@@ -402,6 +405,7 @@ void setup() {
 
   interface->onBoardLED->led[0] = interface->onBoardLED->LED_GREEN;
   interface->onBoardLED->statusLED(100, 1);
+
 }
 
 
@@ -579,7 +583,7 @@ void loop() {
 
  // ................................................................................    
   if (mserial->readUARTserialData()){
-    String $BLE_CMD_Serial_UART= mserial->serialDataReceived;
+    String $BLE_CMD_Serial_UART= mserial->serialUartDataReceived;
     if (gbrl.commands($BLE_CMD_Serial_UART, mserial->DEBUG_TO_UART ) == false){
       if( onBoardSensors->commands($BLE_CMD_Serial_UART, mserial->DEBUG_TO_UART ) == false){
         if (mWifi->gbrl_commands($BLE_CMD_Serial_UART, mserial->DEBUG_TO_USB ) == false){    

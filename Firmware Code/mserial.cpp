@@ -46,11 +46,11 @@ mSerial::mSerial(bool DebugMode, HardwareSerial* UARTserial) {
   this->LogFilename="sccd_log.txt";
 
   this->DEBUG_EN = 1; // ON / OFF
-  this->DEBUG_TO = this->DEBUG_TO_UART ; // UART, BLE   
+  this->DEBUG_TO = this->DEBUG_BOTH_USB_UART ; // UART, BLE   
   this->DEBUG_TYPE = this->DEBUG_TYPE_VERBOSE; // Verbose // Errors 
   this->DEBUG_SEND_REPOSITORY = 0; // YES/ NO
 
-  this->ble = true;
+  this->BLE_IS_DEVICE_CONNECTED = false;
 }
 
 // ------------------------------------------------------
@@ -83,7 +83,7 @@ void mSerial::printStr(String str, uint8_t debugType, uint8_t DEBUG_TO ) {
   void mSerial::log( String str, uint8_t debugType, uint8_t DEBUG_TO ){
     if (this->DEBUG_EN && ( this->DEBUG_TYPE == debugType || this->DEBUG_TYPE == this->DEBUG_TYPE_VERBOSE ) ) {
       if ( ( this->DEBUG_TO == this->DEBUG_TO_BLE || this->DEBUG_TO == this->DEBUG_TO_BLE_UART )  ){
-          if (this->ble)
+          if (this->BLE_IS_DEVICE_CONNECTED)
             this->sendBLEstring(str + String( char(10) ) );
       }
 
@@ -92,7 +92,7 @@ void mSerial::printStr(String str, uint8_t debugType, uint8_t DEBUG_TO ) {
           this->UARTserial->print(str);
         xSemaphoreGive(MemLockSemaphoreSerial); // exit critical section    
       }
-
+      
       if ( this->DEBUG_TO == this->DEBUG_TO_USB || this->DEBUG_TO == this->DEBUG_TO_BLE_UART  || this->DEBUG_TO == this->DEBUG_BOTH_USB_UART ){ // debug to USB
         xSemaphoreTake(MemLockSemaphoreUSBSerial, portMAX_DELAY); // enter critical section
           Serial.print(str);
@@ -108,10 +108,11 @@ void mSerial::printStr(String str, uint8_t debugType, uint8_t DEBUG_TO ) {
   // -----------------------------------------------------------------
 bool mSerial::readSerialData(){
   this->serialDataReceived = "";
+  
   if( Serial.available() ){ // if new data is coming from the HW Serial
     while(Serial.available()){
       char inChar = Serial.read();
-      this->serialDataReceived += inChar;
+      this->serialDataReceived += String(inChar);
     }
     return true;
   }else{
@@ -121,11 +122,14 @@ bool mSerial::readSerialData(){
 
 // -----------------------------------------------------------------
 bool mSerial::readUARTserialData(){
-  this->serialDataReceived = "";
+  this->serialUartDataReceived = "";
+  if ( this->UARTserial == nullptr)
+    return false;
   if( this->UARTserial->available() ){ // if new data is coming from the HW Serial
+
     while(this->UARTserial->available()){
       char inChar = UARTserial->read();
-      this->serialDataReceived += inChar;
+      this->serialUartDataReceived += String(inChar);
     }
     return true;
   }else{

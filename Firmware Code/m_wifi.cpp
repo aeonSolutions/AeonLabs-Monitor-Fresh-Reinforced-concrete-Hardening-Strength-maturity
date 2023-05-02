@@ -336,6 +336,7 @@ bool M_WIFI_CLASS::gbrl_commands(String $BLE_CMD, uint8_t sendTo ){
     dataStr =  "The devie BLE name is " + this->interface->config.DEVICE_BLE_NAME + "\n";
     this->interface->sendBLEstring(dataStr,  sendTo ); 
     return true; 
+    
   }else if($BLE_CMD.indexOf("$set dn ")>-1){
       return this->change_device_name($BLE_CMD,   sendTo );
   }
@@ -393,13 +394,13 @@ bool M_WIFI_CLASS::wifi_commands(String $BLE_CMD, uint8_t sendTo ){
     this->interface->saveSettings();
     
     dataStr= mask + "\n";
-      Serial.println("save 21");
+
   }
 
   if (this->selected_menu=="wifi pwd completed" || $BLE_CMD=="$wifi networks"){
     this->selected_menu = ""; 
     dataStr += "WIFI Netwrok List: " + String( char(10));
-      Serial.println("save 22");
+
     for(int i=0; i<5 ; i++){
       if ( this->interface->config.ssid[i] != ""){
         dataStr += this->interface->config.ssid[i];
@@ -411,9 +412,9 @@ bool M_WIFI_CLASS::wifi_commands(String $BLE_CMD, uint8_t sendTo ){
       }
     }
     dataStr += "\n";
-  Serial.println("save 23");
+
     this->interface->sendBLEstring( dataStr,  sendTo ); 
-      Serial.println("save 24");
+
     return true;
   }
   // ................................................................

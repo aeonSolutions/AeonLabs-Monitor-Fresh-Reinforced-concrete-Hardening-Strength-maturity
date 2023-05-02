@@ -56,7 +56,7 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
     public:
        // *********************** BLE **************************
      BLECharacteristic *pCharacteristicTX;   
-      bool ble;
+      bool BLE_IS_DEVICE_CONNECTED;
       
       // ************* DEBUG *****************
       static constexpr uint8_t DEBUG_TYPE_VERBOSE = 100 ;
@@ -74,6 +74,7 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
       bool DEBUG_SEND_REPOSITORY; // YES/ NO
       String LogFilename;
       String serialDataReceived;
+      String serialUartDataReceived;
 
       bool reinitialize_log_file(fs::FS &fs);
       void setDebugMode(boolean stat);

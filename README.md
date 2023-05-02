@@ -13,7 +13,7 @@
 
 
 
-# Smart Concrete Curing Device
+# Smart Concrete Curing Monitor Device
 
 **The problem**
 

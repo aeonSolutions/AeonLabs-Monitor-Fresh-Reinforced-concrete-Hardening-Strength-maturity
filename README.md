@@ -50,6 +50,12 @@ The proposed assembly solution utilizes a LiPo 2000mAh battery and is able to mo
 <br>
 
 <p align="center">
+If you like this smart device pcb electronics and /or its firmware C++ code consider supporting this project with a one time domation. Links bellow at the bottom and on the rigth side pane. Thank you.
+</p>
+
+<br>
+
+<p align="center">
   <img src="https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/media/20230426_142427.jpg" width=250>
   <img src="https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/media/20230426_142450.jpg" width=250>
   <img src="https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/media/20230426_142535.jpg" width=250>

@@ -23,7 +23,7 @@ Currently, there are commercial solutions for this smart device, for instance, [
 
 This smart device is able to do active monitoring of fresh concrete at any construction site to determine accurately the concrete strength by the hour. This gives an advantage to a construction site team, as is able to accurately know the exact day the concrete structural element can have formworks removed and this saves time and money. The one available here on GitHub can be customized to function without the need for a cloud server, and instead provide the information on the smart device display only. It can also be configured to do measurements upload to a local server located inside the construction site. 
 
-Alternativly, when is required  LIVE remote access to the concrete data, this smart device is capable of LIVE experimental data measurements with a **unique FingerPrint ID** configuted to do measurements and upload directly to an open data repository , such as a [dataverse](https://dataverse.org).
+Alternatively, when is required LIVE remote access to the concrete data, this smart device is capable of LIVE experimental data measurements with a **unique FingerPrint ID** configured to do measurements and upload directly to an open data repository, such as a [dataverse](https://dataverse.org).
 
 <br>
 

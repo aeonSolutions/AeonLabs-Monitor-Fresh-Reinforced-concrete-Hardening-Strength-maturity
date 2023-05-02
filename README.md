@@ -50,7 +50,9 @@ The proposed assembly solution utilizes a LiPo 2000mAh battery and is able to mo
 <br>
 
 <p align="center">
-If you like this smart device pcb electronics and /or its firmware C++ code consider supporting this project with a one time domation. Links bellow at the bottom and on the rigth side pane. Thank you.
+If you like this smart device pcb electronics and /or its firmware C++ code consider supporting this project with a one time domation. <br>
+ Links bellow at the bottom and on the rigth side pane. <br>
+ Thank you.
 </p>
 
 <br>

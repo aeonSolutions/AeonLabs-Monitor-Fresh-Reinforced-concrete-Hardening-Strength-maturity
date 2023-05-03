@@ -57,7 +57,8 @@ class M_WIFI_CLASS {
     WiFiMulti* wifiMulti;
     long int lastTimeWifiConnectAttempt;
     static void WiFiEvent(WiFiEvent_t event);
-    
+    bool errMsgShown;
+
    // GBRL commands  *********************************************
     String selected_menu;
     String selected_sub_menu;

@@ -89,12 +89,14 @@ void mSerial::printStr(String str, uint8_t debugType, uint8_t DEBUG_TO ) {
 
       if ( this->DEBUG_TO == this->DEBUG_TO_UART || this->DEBUG_TO == this->DEBUG_TO_BLE_UART || this->DEBUG_TO == this->DEBUG_BOTH_USB_UART){ // debug to UART
         xSemaphoreTake(MemLockSemaphoreSerial, portMAX_DELAY); // enter critical section
+          this->UARTserial->flush();
           this->UARTserial->print(str);
         xSemaphoreGive(MemLockSemaphoreSerial); // exit critical section    
       }
       
       if ( this->DEBUG_TO == this->DEBUG_TO_USB || this->DEBUG_TO == this->DEBUG_TO_BLE_UART  || this->DEBUG_TO == this->DEBUG_BOTH_USB_UART ){ // debug to USB
         xSemaphoreTake(MemLockSemaphoreUSBSerial, portMAX_DELAY); // enter critical section
+          Serial.flush();
           Serial.print(str);
         xSemaphoreGive(MemLockSemaphoreUSBSerial); // exit critical section    
       }
@@ -114,6 +116,7 @@ bool mSerial::readSerialData(){
       char inChar = Serial.read();
       this->serialDataReceived += String(inChar);
     }
+    Serial.print("R: ");
     return true;
   }else{
     return false;
@@ -125,9 +128,9 @@ bool mSerial::readUARTserialData(){
   this->serialUartDataReceived = "";
   if ( this->UARTserial == nullptr)
     return false;
-  if( this->UARTserial->available() ){ // if new data is coming from the HW Serial
 
-    while(this->UARTserial->available()){
+  if( this->UARTserial->available() ){ // if new data is coming from the HW Serial
+    while( this->UARTserial->available() ){
       char inChar = UARTserial->read();
       this->serialUartDataReceived += String(inChar);
     }

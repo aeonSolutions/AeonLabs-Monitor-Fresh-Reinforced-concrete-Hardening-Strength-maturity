@@ -55,7 +55,6 @@ void MATURITY_CLASS::init(INTERFACE_CLASS* interface, ONBOARD_SENSORS* onBoardSe
 
     this->onewire = OneWire(this->EXT_PLUG_DI_IO); 
     this->sensors= DallasTemperature(&onewire);    
-    this->sensors.begin();    // initialize the DS18B20 sensor
     
     this->last_measured_probe_temp=-1;
     this->last_measured_time_delta=-1;     
@@ -72,7 +71,7 @@ void MATURITY_CLASS::init(INTERFACE_CLASS* interface, ONBOARD_SENSORS* onBoardSe
     this->currentDatasetPos=-1;
 
     this->config.custom_maturity_equation="(p-(-10))*dt";
-    this->config.custom_strenght_equation="62*log(m)+21";
+    this->config.custom_strenght_equation="32*log(m)+10";
 
     for(int i=0; i<8 ; i++){
         this->measureValues[i]=0.0;
@@ -108,6 +107,7 @@ void MATURITY_CLASS::init(INTERFACE_CLASS* interface, ONBOARD_SENSORS* onBoardSe
 
 // ************************************************
 void MATURITY_CLASS::ProbeSensorStatus(uint8_t sendTo){
+    this->sensors.begin();    // initialize the DS18B20 sensor
 
     String dataStr="";
 
@@ -118,24 +118,22 @@ void MATURITY_CLASS::ProbeSensorStatus(uint8_t sendTo){
     if (this->sensors.isParasitePowerMode()) dataStr +="ON\n";
     else dataStr += "OFF\n";
 
-    if (!sensors.getAddress(this->insideThermometer, 0)) dataStr += "Unable to find address for Device 0\n"; 
-
     this->onewire.reset_search();
     // assigns the first address found to insideThermometer
-    if (!this->onewire.search(this->insideThermometer)) dataStr += "Unable to find address for insideThermometer\n";
+    if ( !this->onewire.search(this->insideThermometer) ) dataStr += "Unable to find address temperature probe address. Is it connected ?\n";
 
     // show the addresses we found on the bus
-    dataStr += "Device 0 Address: ";
+    dataStr += "Probe Address: ";
     for (uint8_t i = 0; i < 8; i++)
     {
-    if (this->insideThermometer [i] < 16)  this->mserial->printStr("0");
+    if (this->insideThermometer [i] < 16)  dataStr += "0";
         dataStr += String(this->insideThermometer[i], HEX) ;
     }
 
     // set the resolution to 9 bit (Each Dallas/Maxim device is capable of several different resolutions)
     this->sensors.setResolution(this->insideThermometer, 9);
  
-    dataStr += "\n Device 0 Resolution: ";
+    dataStr += "\n Probe Resolution: ";
     dataStr += String(this->sensors.getResolution(this->insideThermometer), DEC) + "\n\n"; 
     
     this->interface->sendBLEstring( dataStr, sendTo);  
@@ -161,11 +159,10 @@ int MATURITY_CLASS::get_dataset_size(){
 // ******************* Maturity Models ************************************
  void MATURITY_CLASS::get_dataset_values(int pos ){
     if (this->currentDatasetPos==pos){
-        this->mserial->printStrln("data values already in memory");
+        //this->mserial->printStrln("data values already in memory");
         return;
     }
 
-    this->mserial->printStrln("opening datset file: " +  this->interface->config.SENSOR_DATA_FILENAME);
     File file = FFat.open("/" + this->interface->config.SENSOR_DATA_FILENAME, "r");
     int counter=0; 
     
@@ -174,16 +171,11 @@ int MATURITY_CLASS::get_dataset_size(){
 
     String  valStr[8]= {"0.0","0.0","0.0","0.0","0.0","0.0","0.0","0.0"};
 
-    this->mserial->printStrln("get_dataset_values pos:"+ String(pos));
-    
     while (file.available()) {
         if (counter == 0 ) {
             // raed the header
             String bin = file.readStringUntil( char(10) );
-            Serial.println(bin);
-
             String bin2 = file.readStringUntil( char(10) ); 
-            Serial.println(bin2);
         }
         
         if (counter < pos){
@@ -191,29 +183,13 @@ int MATURITY_CLASS::get_dataset_size(){
             counter++;    
         
         }else{
-
-            /*
-String dataStr="Local DateTime; Start Time(s); Time delta (s);Probe Temp (*C); Onboard Temp(*C); Onboard Humidity(%); MCU Temp(*C); Onboard Motion X;Onboard Motion Y;Onboard Motion Z;";
-dataStr += "Onboard YAW motion X;Onboard YAW motion Y;Onboard YAW motion Z;";
-dataStr += "Unique FingerPrint ID (UFPID); Previous UFPID; Internet IP addr; GeoLocation Timestamp; Latitude; Longitude;" + String(char(10));
-            */
-
-            this->mserial->printStrln(" reading data:"+ String(counter));
-
             String bin = file.readStringUntil( ';' ); // RTC Date & Time
 
             long int timeStart = atol(file.readStringUntil( ';' ).c_str() ); // start time 
-            Serial.println(String("Time start:") + String(timeStart) );
-
             long int timeElapsed = atol(file.readStringUntil( ';' ).c_str() );  // time elapsed sincce previous measurement time
-            Serial.println(String("Time elapsed since last measure:") + String(timeElapsed) );
-            
+
             valStr[3] = String( timeElapsed ); // time delta = t since last  measure
-
             valStr[4] = file.readStringUntil( ';' ); // probe temp = p
-            
-            Serial.println(String("probe temp:") + String(valStr[4]) );
-
             valStr[0] = file.readStringUntil( ';' );  // onboard temp = a
             valStr[1] = file.readStringUntil( ';' );  // onboard humidity = h
             valStr[7] = file.readStringUntil( ';' );  // mcu temp = = u
@@ -221,14 +197,12 @@ dataStr += "Unique FingerPrint ID (UFPID); Previous UFPID; Internet IP addr; Geo
             this->measureValues[0] = (valStr[0].toDouble());    // onboard temp
             this->measureValues[1] = (valStr[1].toDouble());    // onboard humidity
             this->measureValues[2] = 0.0;
-            this->measureValues[3] = (valStr[3].toDouble())/3600;    // time delta in hourss
+            this->measureValues[3] = (valStr[3].toDouble())/(3600*1000);    // time delta in hourss; stored value in miliseconds
             this->measureValues[4] = (valStr[4].toDouble());    // probe temp
             this->measureValues[5] = 0.0;
             this->measureValues[6] = 0.0;
             this->measureValues[7] = (valStr[7].toDouble());    // mcu temp
 
-            this->mserial->printStrln(" dt >> str:"+ valStr[3] + " double:" + String(this->measureValues[3],3));
-            this->mserial->printStrln(" p >> str:"+ valStr[4] + " double:" + String(this->measureValues[4],3));
             break;
         } 
     }
@@ -328,9 +302,6 @@ double MATURITY_CLASS::custom_strenght(int pos){
                         };
     const int numVars = 8; //This refers only to the number of entries in vars!!
 
-
-    this->mserial->printStrln("m:"+String(  this->measureValues[5]));
-
     int err;
     te_expr *n = te_compile(this->config.custom_strenght_equation.c_str(), vars, numVars, &err);
 
@@ -390,15 +361,15 @@ double MATURITY_CLASS::custom_strenght(int pos){
         this->interface->Measurments_NEW=false;
         this->interface->$espunixtimeStartMeasure=millis();
         this->interface->$espunixtimePrev = this->interface->$espunixtimeStartMeasure;
+        this->mserial->printStr(" Measurements started."); 
     }
 
     if ( ( millis() - this->interface->$espunixtimePrev) < this->config.MEASUREMENT_INTERVAL ){ 
         return;
     }
 
-    this->mserial->printStr(" Enable PWR on the ADC Plug..."); 
+
     if(this->DATASET_NUM_SAMPLES<1){
-        this->mserial->printStrln("DONE");
         digitalWrite(this->interface->EXT_PLUG_PWR_EN ,HIGH);
         this->interface->POWER_PLUG_IS_ON=true;
         delay(1000);
@@ -410,29 +381,23 @@ double MATURITY_CLASS::custom_strenght(int pos){
 
     this->mserial->printStrln("Time diff (s) = " + String(this->last_measured_time_delta) );
 
-    this->mserial->printStr(" Requesting temperatures..."); 
+    this->mserial->printStr("Probing temperature..."); 
+    this->ProbeSensorStatus(mSerial::DEBUG_NONE);
     this->sensors.requestTemperatures(); // Send the command to get temperature readings 
-    this->mserial->printStrln("DONE"); 
+    this->mserial->printStrln("completed"); 
 
     this->DATASET_NUM_SAMPLES = this->DATASET_NUM_SAMPLES+1;
-    
-    this->mserial->printStrln("dataset counter:"+String(DATASET_NUM_SAMPLES)); 
-    this->mserial->printStr("Temperature("+String(this->DATASET_NUM_SAMPLES)+") is: "); 
-    
+        
     this->last_measured_probe_temp = this->sensors.getTempC( this->insideThermometer );
     if( this->last_measured_probe_temp == DEVICE_DISCONNECTED_C) 
     {
-        this->mserial->printStrln("Error: Could not read temperature data");
+        this->mserial->printStrln("Error: Could not read temperature data. Is the sensor probe connected properly ?");
     }
 
     this->onBoardSensors->request_onBoard_Sensor_Measurements();
     
     // Save data to the dataset file
-    this->save_measurment_record(FFat);
-
-    this->mserial->printStr(String(this->last_measured_probe_temp));
-    this->mserial->printStrln(" ºC");
-    
+    this->save_measurment_record(FFat);    
     // __________________________________________________________________________
 
     //Disable PWR on the PLUG
@@ -454,7 +419,7 @@ bool MATURITY_CLASS::reinitialize_dataset_file(fs::FS &fs){
     }
     auto datasetFile = fs.open("/" +  this->interface->config.SENSOR_DATA_FILENAME , FILE_WRITE); 
     if (datasetFile){
-        this->mserial->printStr("Writing sensor data to the dataset file: " + String(this->interface->config.SENSOR_DATA_FILENAME) );
+        this->mserial->printStrln("reinitializing the dataset file [" + String(this->interface->config.SENSOR_DATA_FILENAME) +"]" );
         
         String dataStr="Local DateTime; Start Time(s); Time Delta (s);Probe Temp (*C); Onboard Temp(*C); Onboard Humidity(%); MCU Temp(*C); Onboard Motion X;Onboard Motion Y;Onboard Motion Z;";
         dataStr += "Onboard YAW motion X;Onboard YAW motion Y;Onboard YAW motion Z;";
@@ -463,7 +428,6 @@ bool MATURITY_CLASS::reinitialize_dataset_file(fs::FS &fs){
         datasetFile.print(dataStr);
         
         datasetFile.close();
-        this->mserial->printStrln("DONE.");
         this->DATASET_NUM_SAMPLES =0;
         this->hasNewMeasurementValues=false;
         return true;
@@ -477,10 +441,7 @@ bool MATURITY_CLASS::reinitialize_dataset_file(fs::FS &fs){
 // -----------------------------------------------------------------------------------
 bool MATURITY_CLASS::save_measurment_record(fs::FS &fs){    
     auto datasetFile = fs.open("/" +  this->interface->config.SENSOR_DATA_FILENAME , FILE_APPEND); 
-    if (datasetFile){
-        
-        this->mserial->printStr("Writing sensor data to the dataset file: " + String(this->interface->config.SENSOR_DATA_FILENAME) );
-      
+    if (datasetFile){      
         String dataStr = String( interface->rtc.getDateTime(true) ) + ";" +  String( this->interface->$espunixtimeStartMeasure )  + ";";
         dataStr += String( this->last_measured_time_delta ) + ";" +  String(roundFloat(this->last_measured_probe_temp ,2)) + ";";
         dataStr += String(roundFloat(this->onBoardSensors->aht_temp, 2)) + ";" + String(roundFloat(this->onBoardSensors->aht_humidity,2)) + ";";  
@@ -512,9 +473,6 @@ bool MATURITY_CLASS::save_measurment_record(fs::FS &fs){
         // append data record to the datset file
         datasetFile.print(dataStr);
         datasetFile.close();
-        this->mserial->printStrln("DONE.");
-
-        this->mserial->printStrln(dataStr);
         return true;
     }else{
       this->mserial->printStrln("Error openning  " + this->interface->config.SENSOR_DATA_FILENAME , this->mserial->DEBUG_TYPE_ERRORS);
@@ -598,7 +556,8 @@ bool MATURITY_CLASS::readSettings(fs::FS &fs){
                     "$mi                 - view current measurement interval\n" \      
                     "$cfg mi [sec]       - config measurements  interval in seconds\n\n";
 
-    this->interface->sendBLEstring( dataStr, sendTo);  
+    this->interface->sendBLEstring( dataStr, sendTo);
+      
     return false;
  }
 
@@ -614,8 +573,9 @@ bool MATURITY_CLASS::gbrl_commands(String $BLE_CMD, uint8_t sendTo){
     long int $timedif;
 
     if( $BLE_CMD == "$pt"){
-        this->sensors.requestTemperatures(); // Send the command to get temperature readings     
-        this->last_measured_probe_temp=this->sensors.getTempCByIndex(0);
+        this->ProbeSensorStatus(mSerial::DEBUG_NONE);
+        this->sensors.requestTemperatures(); // Send the command to get temperature readings 
+        this->last_measured_probe_temp = this->sensors.getTempC( this->insideThermometer );
         dataStr="Current temperature measured is " + String(roundFloat(this->last_measured_probe_temp ,2))+String(char(176))+String("C") + String(char(10));
         this->interface->sendBLEstring( dataStr, sendTo);
         return true;
@@ -679,15 +639,17 @@ bool MATURITY_CLASS::gbrl_commands(String $BLE_CMD, uint8_t sendTo){
     if($BLE_CMD == "$me start"){
         if (this->interface->Measurments_EN){
             dataStr = "Measurments already Started on " + this->interface->measurement_Start_Time + "\n\n";
+            this->interface->sendBLEstring( dataStr, sendTo); 
         }else{
             this->DATASET_NUM_SAMPLES=0;
             this->interface->Measurments_NEW=true;
             this->interface->measurement_Start_Time = this->interface->rtc.getDateTime(true);
             this->interface->Measurments_EN=true;
             dataStr = "Measurments Started on " + this->interface->measurement_Start_Time + "\n";
+            this->interface->sendBLEstring( dataStr, sendTo); 
+            
             this->gbrl_summary_measurement_config(sendTo);
         }
-        this->interface->sendBLEstring( dataStr, sendTo); 
         return true;
 
     }
@@ -708,15 +670,22 @@ bool MATURITY_CLASS::gbrl_commands(String $BLE_CMD, uint8_t sendTo){
     }
     bool result =false;
     result = this->helpCommands( $BLE_CMD,  sendTo);
-    result = this->history($BLE_CMD,  sendTo);
-    result = this->cfg_commands($BLE_CMD,  sendTo);
-    result = this->measurementInterval($BLE_CMD,  sendTo);    
+    
+    bool result2 =false;
+    result2 = this->history($BLE_CMD,  sendTo);
+    
+    bool result3 =false;
+    result3 = this->cfg_commands($BLE_CMD,  sendTo);
+    
+    bool result4 =false;
+    result4 = this->measurementInterval($BLE_CMD,  sendTo);    
     
     //this->gbrl_menu_selection();
 
-    result = this->gbrl_menu_custom_model($BLE_CMD,  sendTo);
+    bool result5 =false;
+    result5 = this->gbrl_menu_custom_model($BLE_CMD,  sendTo);
    
-   return result;
+   return ( result || result2 || result3 || result4 || result5 );
 
 }
 // ********************************************************
@@ -724,8 +693,8 @@ bool MATURITY_CLASS:: gbrl_summary_measurement_config( uint8_t sendTo){
     String dataStr = "Configuration Summary:\n";
     dataStr += "Maturity Model: " + this->config.custom_maturity_equation+ "\n";
     dataStr += "Strenght Model: " + this->config.custom_strenght_equation + "\n";
-    dataStr += "Measurment Interval: " + String(this->config.MEASUREMENT_INTERVAL/1000) + " sec.\n";
-    this->interface->sendBLEstring( dataStr + String( char(10) ) , sendTo); 
+    dataStr += "Measurment Interval: " + String(this->config.MEASUREMENT_INTERVAL/1000) + " sec.\n\n";
+    this->interface->sendBLEstring( dataStr , sendTo); 
     return true;
 }
 
@@ -882,59 +851,58 @@ bool MATURITY_CLASS::history(String $BLE_CMD, uint8_t sendTo){
     if($BLE_CMD != "$history"  )
         return false;
 
-  long int hourT; 
-  long int minT; 
-  long int secT; 
-  long int daysT;
-  String dataStr="";
-  long int $timedif;
-  time_t timeNow;
-  time(&timeNow);
-  
-  dataStr = "Data History" +String(char(10));
+    long int hourT; 
+    long int minT; 
+    long int secT; 
+    long int daysT;
+    String dataStr="";
+    long int $timedif;
+    time_t timeNow;
+    time(&timeNow);
+    
+    dataStr = "Data History" +String(char(10));
 
-  File file = FFat.open("/" + this->interface->config.SENSOR_DATA_FILENAME, "r");
-  int counter=0; 
-  
-  Serial.println("History:");
-  long int sumTimeDelta=0;
+    File file = FFat.open("/" + this->interface->config.SENSOR_DATA_FILENAME, "r");
+    int counter=0; 
 
-  while (file.available()) {
-    if (counter == 0 ) {
-        // raed the header
-        String bin2 = file.readStringUntil( char(10) );
-        bin2 = file.readStringUntil( char(10) );
+    long int sumTimeDelta=0;
+
+    while (file.available()) {
+        if (counter == 0 ) {
+            // raed the header
+            String bin2 = file.readStringUntil( char(10) );
+            bin2 = file.readStringUntil( char(10) );
+        }
+
+        String bin = file.readStringUntil( ';' ); // RTC Date & Time
+
+        long int timeStart = atol(file.readStringUntil( (char) ';' ).c_str() ); //start time of measure 
+
+        long int timeDelta = atol(file.readStringUntil( (char) ';' ).c_str() ); // delta time since last measure
+        sumTimeDelta+=timeDelta; //elapsed time since start time of measure
+
+        float temp = (file.readStringUntil( (char) ';' ).toFloat()); // probe temp.
+
+        String rest = file.readStringUntil( char(10) ); // remaider of data string line
+
+        $timedif = (timeStart+sumTimeDelta) - timeStart;
+        hourT = (long int) ($timedif/3600);
+        minT = (long int) ($timedif/60 - (hourT*60));
+        secT =  (long int) ($timedif - (hourT*3600) - (minT*60));
+        daysT = (long int) (hourT/24);
+        hourT = (long int) (($timedif/3600) - (daysT*24));
+
+        dataStr +=  ": ["+String(daysT)+"d "+ String(hourT)+"h "+ String(minT)+"m "+ String(secT)+"s "+ String("]  ");    
+        dataStr +=  "Temperature: ";
+        dataStr += String(roundFloat(temp,2))+String(char(176))+String("C  ");
+        dataStr += "Maturity:"+String(roundFloat(this->custom_maturity(counter),2)) + String(char(176)) + String("C.h  ");
+        dataStr += "Strenght:"+String(roundFloat(this->custom_strenght(counter),2))+String(" MPa") + String(char(10));
+
+        counter++; 
     }
 
-    String bin = file.readStringUntil( ';' ); // RTC Date & Time
-
-    long int timeStart = atol(file.readStringUntil( (char) ';' ).c_str() ); //start time of measure 
-
-    long int timeDelta = atol(file.readStringUntil( (char) ';' ).c_str() ); // delta time since last measure
-    sumTimeDelta+=timeDelta; //elapsed time since start time of measure
-
-    float temp = (file.readStringUntil( (char) ';' ).toFloat()); // probe temp.
-
-    String rest = file.readStringUntil( char(10) ); // remaider of data string line
-
-    $timedif = (timeStart+sumTimeDelta) - timeStart;
-    hourT = (long int) ($timedif/3600);
-    minT = (long int) ($timedif/60 - (hourT*60));
-    secT =  (long int) ($timedif - (hourT*3600) - (minT*60));
-    daysT = (long int) (hourT/24);
-    hourT = (long int) (($timedif/3600) - (daysT*24));
-    
-    dataStr +=  ": ["+String(daysT)+"d "+ String(hourT)+"h "+ String(minT)+"m "+ String(secT)+"s "+ String("]  ");    
-    dataStr +=  "Temperature: ";
-    dataStr += String(roundFloat(temp,2))+String(char(176))+String("C  ");
-    dataStr += "Maturity:"+String(roundFloat(this->custom_maturity(counter),2)) + String(char(176)) + String("C.h  ");
-    dataStr += "Strenght:"+String(roundFloat(this->custom_strenght(counter),2))+String(" MPa") + String(char(10));
-
-    counter++;     
-  }
-
-  file.close();
-
+    file.close();
+  
   dataStr += "--------------- \n";
   this->interface->sendBLEstring( dataStr, sendTo);
   return true;

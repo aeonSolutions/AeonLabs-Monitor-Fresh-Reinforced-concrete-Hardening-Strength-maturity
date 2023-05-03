@@ -54,6 +54,33 @@ void GBRL::init(INTERFACE_CLASS* interface, MATURITY_CLASS* maturity, mSerial* m
 bool GBRL::commands(String $BLE_CMD, uint8_t sendTo ){
   String dataStr="";
 
+  if($BLE_CMD.indexOf("$sleep ")>-1){
+    if($BLE_CMD == "$sleep status" ){
+        if ( this->interface->LIGHT_SLEEP_EN == true){
+          dataStr= "Sleep mode is enabled on this device.\n\n" ;
+        }else{
+          dataStr= "Sleep mode is disabled on this device.\n\n" ;
+        }
+
+        this->interface->sendBLEstring( dataStr,  sendTo ); 
+        return true;
+    }else if($BLE_CMD == "$sleep on" ){
+        this->interface->LIGHT_SLEEP_EN = true;
+        dataStr= "Smart Device Sleep mode enabled." + String( char(10));
+        this->interface->sendBLEstring( dataStr,  sendTo ); 
+        return true;
+    }else if($BLE_CMD == "$sleep off" ){
+        this->interface->LIGHT_SLEEP_EN = false;
+        dataStr= "Smart Device Sleep mode disabled." + String( char(10));
+        this->interface->sendBLEstring( dataStr,  sendTo ); 
+        return true;
+    }else{
+        dataStr="UNK $ CMD \r\n";
+        this->interface->sendBLEstring( dataStr,  sendTo ); 
+        return true;
+    }
+  }
+
   if($BLE_CMD == "$uid"){
     dataStr = "This Smart Device Serial Number is : ";
     dataStr += CryptoICserialNumber(this->interface) + "\n";
@@ -156,6 +183,8 @@ bool GBRL::runtime(uint8_t sendTo ){
                     "$dt                                - Device Time\n" \
                     "$ver                               - Device Firmware Version\n" \
                     "$uid                               - This Smart Device Unique Serial Number\n" 
+                    "$sleep [on/off]                    - Enable/disable device sleep (save battery power)\n" 
+                    "$sleep status                      - View current device sleep status\n" 
                     "\n" \
                     "$firmware update                   - Update the Device with a newer Firmware\n" \
                     "$firmware cfg [on/auto/manual]     - Configure Firmware updates\n" \
@@ -179,7 +208,8 @@ bool GBRL::runtime(uint8_t sendTo ){
 // *********************************************************
 
 bool GBRL::debug_commands(String $BLE_CMD, uint8_t sendTo ){
-   String dataStr="";
+String dataStr="";
+
  if($BLE_CMD=="$debug repository on"){
       this->interface->mserial->DEBUG_SEND_REPOSITORY=1;
       dataStr= "Debug to a data repository enabled" + String( char(10));

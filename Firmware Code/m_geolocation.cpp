@@ -48,6 +48,7 @@ void GEO_LOCATION_CLASS::init(INTERFACE_CLASS* interface,  M_WIFI_CLASS* mWifi, 
   this->mserial->printStr("init GeoLocation ...");
   this->interface=interface;
   this-> mWifi = mWifi;
+  this->ErrMsgShown=false;
   
   this->REQUEST_DELTA_TIME  = 10*60*1000; // 10 min 
   this->$espunixtimePrev= millis(); 
@@ -86,7 +87,6 @@ void GEO_LOCATION_CLASS::get_ip_geo_location_data(String ipAddress){
   if ( ( millis() - this->$espunixtimePrev) < this->REQUEST_DELTA_TIME )
     return;
     
-
   if (this->interface->CURRENT_CLOCK_FREQUENCY <= this->interface->WIFI_FREQUENCY )
       changeMcuFreq(this->interface, this->interface->WIFI_FREQUENCY);
     
@@ -95,8 +95,14 @@ void GEO_LOCATION_CLASS::get_ip_geo_location_data(String ipAddress){
   }
   
   if (WiFi.status() != WL_CONNECTED){
+    if (this->ErrMsgShown == false){
+      this->ErrMsgShown = true;
       this->mserial->printStrln("unable to connect to WIFI.");
-      return;
+    }
+    interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
+    interface->onBoardLED->statusLED(100, 1);
+    this->mWifi->resumeStandbyMode();
+    return;
   }
   this->$espunixtimePrev= millis();
   
@@ -126,8 +132,14 @@ void GEO_LOCATION_CLASS::get_ip_geo_location_data(String ipAddress){
             // Parse JSON object
             DeserializationError error = deserializeJson(geoLocationInfoJsonStatic, JSONpayload);
             if (error) {
-                Serial.print("Error deserializing JSON");
-                //this->interface->geoLocationInfoJson=nullptr;
+                if (this->ErrMsgShown == false){
+                  this->ErrMsgShown = true;
+                  Serial.print("Error deserializing JSON");
+                }
+                interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
+                interface->onBoardLED->statusLED(100, 1);
+                this->mWifi->resumeStandbyMode();
+                return;
             }else{
                 this->interface->geoLocationInfoJson = geoLocationInfoJsonStatic[0];
                 this->interface->requestGeoLocationDateTime= String( this->interface->rtc.getDateTime(true) );
@@ -152,14 +164,21 @@ void GEO_LOCATION_CLASS::get_ip_geo_location_data(String ipAddress){
                 */
             }
         }else {
-            Serial.print("Error code: ");
-            Serial.println(httpResponseCode);
+            if (this->ErrMsgShown == false){
+              this->ErrMsgShown = true;
+              Serial.print("Http error " + String(httpResponseCode));
+            }
+            interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
+            interface->onBoardLED->statusLED(100, 1);
+            this->mWifi->resumeStandbyMode();
+            return;
         }
         // Free resources
         http.end();
     }else {
       //Serial.println("WiFi Disconnected");
     }
+  this->ErrMsgShown = false;
   this->mWifi->resumeStandbyMode();
 }
 

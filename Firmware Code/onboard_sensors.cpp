@@ -286,6 +286,7 @@ void ONBOARD_SENSORS::I2Cscanner() {
 
 
     this->interface->sendBLEstring( dataStr, sendTo);
+
     return false; 
  }
 

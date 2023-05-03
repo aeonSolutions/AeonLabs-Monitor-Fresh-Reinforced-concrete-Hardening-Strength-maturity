@@ -48,7 +48,7 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
           long int            REQUEST_DELTA_TIME;
           long int            $espunixtimePrev;
           
-          
+          bool ErrMsgShown;
       public:
           GEO_LOCATION_CLASS();
           void get_ip_address();

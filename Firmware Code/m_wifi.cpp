@@ -45,6 +45,7 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
 M_WIFI_CLASS::M_WIFI_CLASS(){
   this->MemLockSemaphoreWIFI = xSemaphoreCreateMutex();
   this->WIFIconnected=false;
+  this->errMsgShown = false;
 }
 
 
@@ -90,11 +91,15 @@ bool M_WIFI_CLASS::connect2WIFInetowrk(uint8_t numberAttempts){
   if (WiFi.status() == WL_CONNECTED)
     return true;
   
-  if (this->interface->getNumberWIFIconfigured() == 0){
-    this->mserial->printStrln("You need to add a wifi network first", this->mserial->DEBUG_TYPE_ERRORS);
+  if (this->interface->getNumberWIFIconfigured() == 0 ){
+    if ( this->errMsgShown == false ){
+      this->mserial->printStrln("C2W: You need to add a wifi network first", this->mserial->DEBUG_TYPE_ERRORS);
+      this->errMsgShown = true;
+    }
     return false;
   }
-
+  
+  this->errMsgShown = false;
   //WiFi.disconnect(true);
   //WiFi.onEvent(M_WIFI_CLASS::WiFiEvent);
   
@@ -354,15 +359,29 @@ bool M_WIFI_CLASS::gbrl_commands(String $BLE_CMD, uint8_t sendTo ){
                     "$wifi status                       - View WIFI status\n" \
                     "$wifi networks                     - View configured WIFI networks\n" \
                     "$wifi ssid                         - Add WIFI network\n" \
-                    "$wifi clear                        - Clear all WIFI credentials\n\n";
+                    "$wifi clear                        - Clear all WIFI credentials\n" \
+                    "$wifi default                      - Enable \"SCC WIFI\" default SSID Network\n\n";
 
     this->interface->sendBLEstring( dataStr,  sendTo ); 
+    
     return false; 
  }
 
  // *********************************************************
 bool M_WIFI_CLASS::wifi_commands(String $BLE_CMD, uint8_t sendTo ){
   String dataStr="";
+  
+  if($BLE_CMD=="$wifi default"){
+    this->interface->clear_wifi_networks();
+    this->interface->add_wifi_network("SCC WIFI", "1234567890");
+    dataStr = "Default WIFI network is SET.\n";
+    dataStr = "You need to setup your WIFI Access Point with the follwoing credentials:\n";
+    dataStr += "Network SSID: \"SCC WIFI\"\n";
+    dataStr += "Password: \"1234567890\"\n\n";
+    this->interface->sendBLEstring( dataStr,  sendTo ); 
+  return true;
+  }  
+  
   if($BLE_CMD=="$wifi status"){
       dataStr= "Current WIFI status:" + String( char(10));
       dataStr += "     IP     : " + WiFi.localIP().toString() + "\n";

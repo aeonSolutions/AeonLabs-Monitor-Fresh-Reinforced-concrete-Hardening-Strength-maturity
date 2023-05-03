@@ -99,10 +99,7 @@ void INTERFACE_CLASS::settings_defaults(){
   this->config.firmwareUpdate="auto";
   this->config.isBatteryPowered=false;
   this->config.isWIFIenabled=false;
- 
-  this->clear_wifi_networks();
-  this->add_wifi_network("SCC WIFI", "1234567890");
-  
+   
   this->Measurments_EN=false;
   this->Measurments_NEW=false;
   this->config.SENSOR_DATA_FILENAME="concrete_curing.csv";
@@ -112,6 +109,8 @@ void INTERFACE_CLASS::settings_defaults(){
   this->BLE_IS_DEVICE_CONNECTED=false;
   this->config.DEVICE_BLE_NAME="Slab 12A";
   this->forceFirmwareUpdate=false;
+
+  this->clear_wifi_networks();
 }
 
 // ****************************************************
@@ -161,21 +160,24 @@ void INTERFACE_CLASS::init_NTP_Time(char* ntpServer_, long gmtOffset_sec_, int d
 
 // ***************************************************************************
 void INTERFACE_CLASS::sendBLEstring(String message,  uint8_t sendTo ){
-  this->mserial->printStrln("[APP] Free memory: " + String(esp_get_free_heap_size()) + " bytes");
+  if (sendTo == mSerial::DEBUG_NONE )
+    return;
 
-  if (WiFi.status() == WL_CONNECTED){
-    mserial->printStrln("disconnectiong WIFI");
-    WiFi.disconnect(true);
-    delay(100);
-  }
+  this->mserial->printStrln("Free memory: " + String(esp_get_free_heap_size()) + " bytes");
   
   if( message == "")
       message= "empty message found.\n";
 
 
-  if ( (sendTo == mSerial::DEBUG_TO_BLE && this->BLE_IS_DEVICE_CONNECTED==true ) || this->BLE_IS_DEVICE_CONNECTED==true ){
+  if ( ( sendTo == mSerial::DEBUG_TO_BLE || sendTo == mSerial::DEBUG_BOTH_USB_UART_BLE || sendTo == mSerial::DEBUG_TO_BLE_UART) && this->BLE_IS_DEVICE_CONNECTED==true ){
+    if (WiFi.status() == WL_CONNECTED){
+      WiFi.disconnect(true);
+      delay(300);
+    }
     this->mserial->sendBLEstring(message, sendTo);
-  }else{
+  }
+
+  if ( sendTo != mSerial::DEBUG_NONE && sendTo != mSerial::DEBUG_TO_BLE ){
     this->mserial->printStr(message, sendTo);
   }
 }

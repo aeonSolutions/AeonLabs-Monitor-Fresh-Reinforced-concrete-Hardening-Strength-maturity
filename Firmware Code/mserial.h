@@ -62,10 +62,12 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
       static constexpr uint8_t DEBUG_TYPE_VERBOSE = 100 ;
       static constexpr uint8_t DEBUG_TYPE_ERRORS = 101;
 
+      static constexpr uint8_t DEBUG_NONE = -1;
       static constexpr uint8_t DEBUG_TO_BLE = 10;
       static constexpr uint8_t DEBUG_TO_UART = 11;
       static constexpr uint8_t DEBUG_TO_USB = 13;
       static constexpr uint8_t DEBUG_BOTH_USB_UART = 14;
+      static constexpr uint8_t DEBUG_BOTH_USB_UART_BLE = 14;
       static constexpr uint8_t DEBUG_TO_BLE_UART = 12;
 
       bool DEBUG_EN; // ON / OFF

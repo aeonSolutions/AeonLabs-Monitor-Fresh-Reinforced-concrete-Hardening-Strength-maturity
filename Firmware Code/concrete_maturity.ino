@@ -241,7 +241,7 @@ long int prevMeasurementMillis;
 
 void setup() { 
   // Firmware Build Version / revision ______________________________
-  interface->firmware_version="1.0.8";
+  interface->firmware_version="1.0.9";
 
   MemLockSemaphoreBLE_RX = xSemaphoreCreateMutex();
 
@@ -383,7 +383,6 @@ void setup() {
   interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
   interface->onBoardLED->statusLED(100, 0);
 
-  Serial.println("[APP] Free memory: " + String(esp_get_free_heap_size()) + " bytes");
   dataverse->init(interface, mWifi, mserial);
 
   //Init GBRL 
@@ -399,9 +398,10 @@ void setup() {
 
   runningTimeMillis = millis();
   prevMeasurementMillis = millis();
+  Serial.println("Free memory: " + String(esp_get_free_heap_size()) + " bytes\n");
   
   mserial->printStrln("\nsetup is completed. You may start using the " + String(DEVICE_NAME) );
-  mserial->printStrln("Type $? for a List of commands.");
+  mserial->printStrln("Type $? for a List of commands.\n");
 
   interface->onBoardLED->led[0] = interface->onBoardLED->LED_GREEN;
   interface->onBoardLED->statusLED(100, 1);
@@ -458,7 +458,6 @@ long int eTime;
 
 
 void loop() {
-
   if ( interface->BLE_IS_DEVICE_CONNECTED  && welcomeIntroDone==false ) {
     delay(3000);
     welcomeIntroDone=true;
@@ -475,7 +474,6 @@ void loop() {
 // ................................................................................
 
   if ( deviceDisconnected_BLE_callback && onBoardSensors->motionShakeDetected(5) && ( interface->CURRENT_CLOCK_FREQUENCY != interface->WIFI_FREQUENCY ) ) {
-        Serial.println("next 0");
     deviceDisconnected_BLE_callback=false;
     changeMcuFreq(interface, interface->WIFI_FREQUENCY);
     interface->onBoardLED->led[0] = interface->onBoardLED->LED_BLUE;
@@ -488,7 +486,6 @@ void loop() {
   }
     
   if (deviceDisconnected_BLE_callback && interface->CURRENT_CLOCK_FREQUENCY >= interface->WIFI_FREQUENCY){
-          Serial.println("next `1");
       interface->$espunixtimeDeviceDisconnected=millis();
       deviceDisconnected_BLE_callback=true;
       btStop();
@@ -519,7 +516,7 @@ void loop() {
       esp_light_sleep_start();
       mserial->printStrln("wake up done.");
       if ( interface->BLE_IS_DEVICE_CONNECTED){
-            interface->sendBLEstring( "waking up. You may enter any GBRL command now.");
+        interface->sendBLEstring( "waking up. You may enter any GBRL command now.");
       }
     }
   }
@@ -534,8 +531,7 @@ void loop() {
 
 // ................................................................................
 
-  if (interface->BLE_IS_DEVICE_CONNECTED && maturity->hasNewMeasurementValues==true  && (millis() != prevMeasurementMillis) ) {
-    mserial->printStrln("Device connected...");
+  if (maturity->hasNewMeasurementValues==true  && (millis() != prevMeasurementMillis) ) {
     float maturityVal = maturity->custom_maturity(maturity->DATASET_NUM_SAMPLES);
     float strenghtVal = maturity->custom_strenght(maturity->DATASET_NUM_SAMPLES);
 
@@ -545,14 +541,12 @@ void loop() {
     dataStr += "Unique Data Fingerprint ID:"+String(char(10));
     dataStr += CryptoICserialNumber(interface)+"-"+macChallengeDataAuthenticity(interface, String(interface->rtc.getDateTime(true)) + String(roundFloat(maturity->last_measured_probe_temp,2))+"-"+String(roundFloat(maturityVal ,2))+"-"+String(roundFloat(strenghtVal ,2))  );
     dataStr += String(char(10) + String(char(10)) );
-    interface->sendBLEstring( dataStr);
-
-    mserial->printStrln("BLE output...");
-    mserial->printStr("TTF( Maturity): ");
-    mserial->printStrln(String(roundFloat(maturityVal ,2)));
-
-    mserial->printStr("Strenght(MPa): ");
-    mserial->printStrln(String(strenghtVal ));
+    
+    bool sendTo= mSerial::DEBUG_BOTH_USB_UART;
+    if (interface->BLE_IS_DEVICE_CONNECTED )
+      sendTo = mSerial::DEBUG_BOTH_USB_UART_BLE;      
+    
+    interface->sendBLEstring( dataStr, sendTo);
 
     maturity->hasNewMeasurementValues=false;
   }
@@ -562,72 +556,47 @@ void loop() {
   geoLocation.get_ip_geo_location_data();
   dataverse->UploadToDataverse(interface->BLE_IS_DEVICE_CONNECTED);
 
-
  // ................................................................................    
   if (mserial->readSerialData()){
-    String $BLE_CMD_Serial= mserial->serialDataReceived;
-    if (gbrl.commands($BLE_CMD_Serial, mserial->DEBUG_TO_USB ) == false){
-      if( onBoardSensors->commands($BLE_CMD_Serial, mserial->DEBUG_TO_USB ) == false){
-        if (mWifi->gbrl_commands($BLE_CMD_Serial, mserial->DEBUG_TO_USB ) == false){    
-          if (maturity->gbrl_commands($BLE_CMD_Serial, mserial->DEBUG_TO_USB ) == false){
-            if( dataverse->gbrl_commands($BLE_CMD_Serial, mserial->DEBUG_TO_USB ) == false){
-              if ($BLE_CMD_Serial.indexOf("$")==-1 || $BLE_CMD_Serial.indexOf("$")>0){
-                mserial->printStrln("$ CMD ERROR \r\n");
-              }
-            }
-          }
-        }
-      }
-    }
+    GBRLcommands(mserial->serialDataReceived, mserial->DEBUG_TO_USB);
   }
 
  // ................................................................................    
   if (mserial->readUARTserialData()){
-    String $BLE_CMD_Serial_UART= mserial->serialUartDataReceived;
-    if (gbrl.commands($BLE_CMD_Serial_UART, mserial->DEBUG_TO_UART ) == false){
-      if( onBoardSensors->commands($BLE_CMD_Serial_UART, mserial->DEBUG_TO_UART ) == false){
-        if (mWifi->gbrl_commands($BLE_CMD_Serial_UART, mserial->DEBUG_TO_USB ) == false){    
-          if (maturity->gbrl_commands($BLE_CMD_Serial_UART, mserial->DEBUG_TO_UART ) == false){
-            if( dataverse->gbrl_commands($BLE_CMD_Serial_UART, mserial->DEBUG_TO_UART ) == false){
-              if ($BLE_CMD_Serial_UART.indexOf("$")==-1 || $BLE_CMD_Serial_UART.indexOf("$")>0){
-                mserial->printStrln("$ CMD ERROR \r\n");
+    GBRLcommands(mserial->serialUartDataReceived, mserial->DEBUG_TO_UART);
+  }
+// ................................................................................
+  if (newCMDarrived){
+    xSemaphoreTake(MemLockSemaphoreBLE_RX, portMAX_DELAY); 
+      newCMDarrived=false; // this needs to be the last line       
+    xSemaphoreGive(MemLockSemaphoreBLE_RX);
+
+    GBRLcommands($BLE_CMD, mserial->DEBUG_TO_BLE);
+  }
+// ................................................................................
+
+  if ( interface->forceFirmwareUpdate == true )
+    forceFirmwareUpdate();
+    
+}
+// ********************************************
+void GBRLcommands(String command, uint8_t sendTo){
+    if (gbrl.commands(command, sendTo) == false){
+      if( onBoardSensors->commands(command, sendTo ) == false){
+        if (mWifi->gbrl_commands(command, sendTo ) == false){    
+          if (maturity->gbrl_commands(command, sendTo ) == false){
+            if( dataverse->gbrl_commands(command, sendTo ) == false){
+              if ($BLE_CMD.indexOf("$")==-1 || $BLE_CMD.indexOf("$")>0){
+                interface->sendBLEstring("$ CMD ERROR \r\n");
+              }else{
+                interface->sendBLEstring("$ CMD UNK \r\n");
               }
             }
           }
         }
       }
     }
-  }
-// ................................................................................
-  if (newCMDarrived){
-    Serial.println("[APP] Free memory: " + String(esp_get_free_heap_size()) + " bytes");
-
-    xSemaphoreTake(MemLockSemaphoreBLE_RX, portMAX_DELAY); 
-      newCMDarrived=false; // this needs to be the last line       
-    xSemaphoreGive(MemLockSemaphoreBLE_RX);
-
-    if (gbrl.commands($BLE_CMD, mserial->DEBUG_TO_BLE ) == false){
-      if( onBoardSensors->commands($BLE_CMD,  mserial->DEBUG_TO_BLE ) == false){
-        if (maturity->gbrl_commands($BLE_CMD,  mserial->DEBUG_TO_BLE ) == false){
-          if( dataverse->gbrl_commands($BLE_CMD,  mserial->DEBUG_TO_BLE ) == false){
-            if ($BLE_CMD.indexOf("$")==-1 || $BLE_CMD.indexOf("$")>0){
-              interface->sendBLEstring("$ CMD ERROR \r\n");
-            }else{
-              interface->sendBLEstring("$ CMD UNK \r\n");
-            }
-          }
-        }
-      }
-    }
-
-  }
-// ................................................................................
-
-  if ( interface->forceFirmwareUpdate == true ){
-    forceFirmwareUpdate();
-  }
 }
-
 // *******************************************************************************************
 void forceFirmwareUpdate(){
     interface->forceFirmwareUpdate=false;
@@ -647,12 +616,21 @@ void forceFirmwareUpdate(){
         mserial->printStrln("Firmware: No Wifi networks configured");
         if ( interface->BLE_IS_DEVICE_CONNECTED)
           interface->sendBLEstring("Firmware: No Wifi networks configured.\n");
+        
+        interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
+        interface->onBoardLED->statusLED(100, 1);
+        return;   
       }
     }
 
   if(WiFi.status() != WL_CONNECTED){
-    Serial.println ("Firmware: WIFI not connected");
-    return;
+    mserial->printStrln("Firmware: Wifi not connected.");
+    if ( interface->BLE_IS_DEVICE_CONNECTED)
+      interface->sendBLEstring("Firmware: Wifi not connected.\n");
+    
+    interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
+    interface->onBoardLED->statusLED(100, 1);
+    return;   
   }
 
   if ( interface->BLE_IS_DEVICE_CONNECTED){

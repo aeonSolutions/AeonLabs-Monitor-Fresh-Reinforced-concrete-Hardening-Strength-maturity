@@ -51,6 +51,7 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
     mSerial* mserial;
 
     String DATASET_REPOSITORY_URL; 
+    bool ErrMsgShown;
 
   public:
         typedef struct{

@@ -60,6 +60,7 @@ void DATAVERSE_CLASS::init(INTERFACE_CLASS* interface, M_WIFI_CLASS* mWifi, mSer
     this->$espunixtimePrev= millis();
   
   // ToDo: load Dataverse settings
+    this->ErrMsgShown = false;
 
     this->mserial->printStrln("done.");
 }
@@ -109,8 +110,11 @@ void DATAVERSE_CLASS::UploadToDataverse(bool ble_connected) {
       this->mWifi->start(10000, 5); // TTL , n attempts 
       this->mWifi->updateInternetTime();
     }
-    if (WiFi.status() != WL_CONNECTED){
-      this->mserial->printStrln("DATAVERSE: unable to connect to WIFI.");
+    if (WiFi.status() != WL_CONNECTED ){
+      if (this->ErrMsgShown == false){
+        this->ErrMsgShown = true;
+        this->mserial->printStrln("DATAVERSE: unable to connect to WIFI.");
+    }
       return;
     }
   this->$espunixtimePrev= millis();
@@ -132,7 +136,10 @@ void DATAVERSE_CLASS::UploadToDataverse(bool ble_connected) {
       // Parse JSON object
       DeserializationError error = deserializeJson(datasetLocksJson, rawResponse);
       if (error) {
-        this->mserial->printStr("unable to retrive dataset lock status. Upload not possible. ERR: "+ String(error.f_str()));
+        if (this->ErrMsgShown == false){
+          this->ErrMsgShown = true;
+          this->mserial->printStr("unable to retrive dataset lock status. Upload not possible. ERR: "+ String(error.f_str()));
+        }
         //this->mserial->printStrln(rawResponse);
         interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
         interface->onBoardLED->statusLED(100, 5);
@@ -141,14 +148,16 @@ void DATAVERSE_CLASS::UploadToDataverse(bool ble_connected) {
       }else{
          String stat = datasetObject["status"];
          if(datasetObject.containsKey("lockType")){
-
            String locktype = String(datasetObject["data"]["lockType"].as<char*>());           
            this->mserial->printStrln("There is a Lock on the dataset: "+ locktype); 
            this->mserial->printStrln("Upload of most recent data is not possible without removal of the lock.");  
            // Do unlocking 
                 
          }else{
-            this->mserial->printStrln("The dataset is unlocked. Upload possible.");
+            if (this->ErrMsgShown == false){
+              this->ErrMsgShown = true;
+              this->mserial->printStrln("The dataset is unlocked. Upload possible.");
+            }
             interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
             interface->onBoardLED->statusLED(100, 5);
             this->mWifi->resumeStandbyMode();
@@ -156,14 +165,20 @@ void DATAVERSE_CLASS::UploadToDataverse(bool ble_connected) {
         }
       }
     }else{
-      this->mserial->printStrln("dataset ID is empty. Upload not possible. ");
+      if (this->ErrMsgShown == false){
+        this->ErrMsgShown = true;
+        this->mserial->printStrln("dataset ID is empty. Upload not possible. ");
+      }
       interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
       interface->onBoardLED->statusLED(100, 5); 
       this->mWifi->resumeStandbyMode();
       return;
     }
   }else{
-    this->mserial->printStrln("dataset metadata not loaded. Upload not possible. ");
+    if (this->ErrMsgShown == false){
+      this->ErrMsgShown = true;
+      this->mserial->printStrln("dataset metadata not loaded. Upload not possible. ");
+    }
     interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
     interface->onBoardLED->statusLED(100, 5); 
     this->mWifi->resumeStandbyMode();
@@ -173,7 +188,10 @@ void DATAVERSE_CLASS::UploadToDataverse(bool ble_connected) {
   // Open the dataset file and prepare for binary upload
   File datasetFile = FFat.open("/"+ this->interface->config.SENSOR_DATA_FILENAME, FILE_READ);
   if (!datasetFile){
-    this->mserial->printStrln("Dataset file not found");
+    if (this->ErrMsgShown == false){
+      this->ErrMsgShown = true;
+      this->mserial->printStrln("Dataset file not found");
+    }
     interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
     interface->onBoardLED->statusLED(100, 5);
     this->mWifi->resumeStandbyMode();
@@ -198,10 +216,13 @@ void DATAVERSE_CLASS::UploadToDataverse(bool ble_connected) {
   this->mWifi->client.stop();
   this->mWifi->client.setCACert(HARVARD_ROOT_CA_RSA_SHA1);
   if (!this->mWifi->client.connect(SERVER_URL_char, this->config.SERVER_PORT)) {
-      this->mserial->printStrln("Cloud server URL connection FAILED!");
-      this->mserial->printStrln(SERVER_URL_char);
-      int server_status = this->mWifi->client.connected();
-      this->mserial->printStrln("Server status code: " + String(server_status));
+        if (this->ErrMsgShown == false){
+          this->ErrMsgShown = true;
+          this->mserial->printStrln("Cloud server URL connection FAILED!");
+          this->mserial->printStrln(SERVER_URL_char);
+          int server_status = this->mWifi->client.connected();
+          this->mserial->printStrln("Server status code: " + String(server_status));
+        }
       interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
       interface->onBoardLED->statusLED(100, 5);
       this->mWifi->resumeStandbyMode();
@@ -327,10 +348,13 @@ String DATAVERSE_CLASS::GetInfoFromDataverse(String url) {
   this->mWifi->client.setCACert(HARVARD_ROOT_CA_RSA_SHA1);
     
   if (!this->mWifi->client.connect(SERVER_URL_char, this->config.SERVER_PORT)) {
-      this->mserial->printStrln("Cloud server URL connection FAILED!");
-      this->mserial->printStrln(SERVER_URL_char);
-      int server_status = this->mWifi->client.connected();
-      this->mserial->printStrln("Server status code: " + String(server_status));
+      if (this->ErrMsgShown == false){
+        this->ErrMsgShown = true;
+        this->mserial->printStrln("Cloud server URL connection FAILED!");
+        this->mserial->printStrln(SERVER_URL_char);
+        int server_status = this->mWifi->client.connected();
+        this->mserial->printStrln("Server status code: " + String(server_status));
+      }
       this->mWifi->resumeStandbyMode();
       return "";
   }
@@ -399,6 +423,7 @@ String DATAVERSE_CLASS::GetInfoFromDataverse(String url) {
   this->mWifi->resumeStandbyMode();
   
   return responseContent;
+  this->ErrMsgShown = false;
   }
 
 

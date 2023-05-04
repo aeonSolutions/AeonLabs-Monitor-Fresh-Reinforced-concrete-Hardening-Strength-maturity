@@ -34,7 +34,8 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
 
 #include "m_file_class.h"
 #include <esp_partition.h>
-#include "FFat.h"
+#include "FS.h"
+#include <LittleFS.h>
 #include "mserial.h"
 #include "m_file_functions.h"
 
@@ -42,7 +43,7 @@ FILE_CLASS::FILE_CLASS(mSerial* mserial){
   this->mserial = mserial;
 }
 
-bool FILE_CLASS::init(fs::FS &fs, String partitionName, uint8_t maxFiles, mSerial* mserial, ONBOARD_LED_CLASS* onboardLED){
+bool FILE_CLASS::init(fs::LittleFSFS &fs, String partitionName, uint8_t maxFiles, mSerial* mserial, ONBOARD_LED_CLASS* onboardLED){
     this->mserial=mserial;
     this->onBoardLED=onBoardLED;
     
@@ -52,37 +53,37 @@ bool FILE_CLASS::init(fs::FS &fs, String partitionName, uint8_t maxFiles, mSeria
     //this->mserial->printStrln("Onboard LED RED:" + String(this->onBoardLED->led[0]) + " = " + String(this->onBoardLED->LED_RED ) );
     //this->mserial->printStrln("init drive 3...");
 
-    if(true==FFat.begin( 0, "", maxFiles , "storage")){ // !! Only allow one file to be open at a time instead of 10, saving 9x4 - 36KB of RAM          
-    this->mserial->printStrln( "Drive init...done.");
-//      this->onBoardLED->led[0] = this->onBoardLED->LED_GREEN;
- //     this->onBoardLED->statusLED(100, 1);
-    }else{
-      if(FFat.format(1, "storage")){
+
+    if(true==fs.begin( false, "/storage", maxFiles , "storage")){ // !! Only allow one file to be open at a time instead of 10, saving 9x4 - 36KB of RAM          
+      this->mserial->printStrln( "Drive init...done.");
+    //this->onBoardLED->led[0] = this->onBoardLED->LED_GREEN;
+    //this->onBoardLED->statusLED(100, 1);
+    }else if(fs.format()){
         this->mserial->printStrln("Drive formated sucessfully!");
       //  this->onBoardLED->led[0] = this->onBoardLED->LED_RED;
       //  this->onBoardLED->led[0] = this->onBoardLED->LED_GREEN;
       //  this->onBoardLED->statusLED(100, 2);
-        if(true==FFat.begin( 0, "", 10 , "storage")){
+        if(true==fs.begin( false, "/storage", maxFiles , "storage")){
           this->mserial->printStrln( "Drive init...done.");
        // this->onBoardLED->led[0] = this->onBoardLED->LED_GREEN;
        // this->onBoardLED->statusLED(100, 1);
         }else{
           this->mserial->printStrln("Drive Mount Failed");
           return false;
-        }      
-      }else{
-        this->mserial->printStrln("Drive Format Failed");
+        }   
+
+    }else{
+        this->mserial->printStrln("Drive init Failed");
      //   this->onBoardLED->led[0] = this->onBoardLED->LED_RED;
      //   this->mserial->printStrln("here 1");
      //   this->onBoardLED->statusLED(100, 5);
      //   this->mserial->printStrln("here 2");
         return false;
-      }
     }
 
     this->mserial->printStrln("File system mounted");
-    this->mserial->printStrln("Total space: " + addThousandSeparators( std::string( String(FFat.totalBytes() ).c_str() ) ) + " bytes");
-    this->mserial->printStrln("Free space: " + addThousandSeparators( std::string( String(FFat.freeBytes() ).c_str() ) )  + " bytes\n" );
+    this->mserial->printStrln("Total space: " + addThousandSeparators( std::string( String(fs.totalBytes() ).c_str() ) ) + " bytes");
+    this->mserial->printStrln("used space: " + addThousandSeparators( std::string( String(fs.usedBytes() ).c_str() ) )  + " bytes\n" );
     return true;
 }
 
@@ -112,7 +113,7 @@ void FILE_CLASS::partloop(esp_partition_type_t part_type) {
 void FILE_CLASS::storage_list_files(fs::FS &fs){
     this->mserial->printStrln("Listing Files and Directories: ");
     // Open dir folder
-    auto dir = fs.open("/");
+    auto dir = fs.open("/storage");
     // Cycle all the content
     onBoardLED->led[1] = onBoardLED->LED_RED;
     onBoardLED->statusLED(100,0); 
@@ -124,7 +125,7 @@ void FILE_CLASS::storage_list_files(fs::FS &fs){
 
 //***********************************************************
 bool FILE_CLASS::storage_test_write_file(fs::FS &fs){    
-    auto testFile = fs.open(F("/testCreate.txt"), "w"); 
+    auto testFile = fs.open(F("/storage/testCreate.txt"), "w"); 
     if (testFile){
       this->mserial->printStr("Writing content to a file...");
       testFile.print("Here the test text!!");
@@ -141,7 +142,7 @@ bool FILE_CLASS::storage_test_write_file(fs::FS &fs){
 
 //***********************************************************
 bool FILE_CLASS::storage_test_read_file(fs::FS &fs){
-    auto testFile = fs.open(F("/testCreate.txt"), "r");
+    auto testFile = fs.open(F("/storage/testCreate.txt"), "r");
     if (testFile){
       this->mserial->printStrln("-- Reading file content (below) --");
       this->mserial->printStrln(testFile.readString());

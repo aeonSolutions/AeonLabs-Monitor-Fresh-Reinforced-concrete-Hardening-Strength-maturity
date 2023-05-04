@@ -80,6 +80,8 @@ Where,
     int currentDatasetPos;    
     String var[8];
     String signs[9];
+
+    long int prevTimeMeasured;
     
    // GBRL commands  *********************************************
     bool gbrl_menu_selection(String $BLE_CMD, uint8_t sendTo);
@@ -114,7 +116,11 @@ Where,
     float last_measured_probe_temp;
     float last_measured_time_delta;     
     int DATASET_NUM_SAMPLES;
-
+    
+    bool Measurments_EN;
+    bool Measurments_NEW;
+    String measurement_Start_Time;
+    
     mSerial* mserial=nullptr;
     INTERFACE_CLASS* interface=nullptr;
     ONBOARD_SENSORS* onBoardSensors=nullptr;

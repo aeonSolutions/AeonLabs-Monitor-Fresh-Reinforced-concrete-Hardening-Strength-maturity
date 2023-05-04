@@ -68,7 +68,7 @@ void DATAVERSE_CLASS::init(INTERFACE_CLASS* interface, M_WIFI_CLASS* mWifi, mSer
 // *********************************************************
 
 bool DATAVERSE_CLASS::saveSettings(fs::FS &fs){
-  auto settingsFile = fs.open(F("/dataverse.cfg"), "w"); 
+  File settingsFile = fs.open(F("/dataverse.cfg"), "w"); 
   if (!settingsFile)
     return false;
 

@@ -79,7 +79,9 @@ bool TEST_FINGERPRINT_ID_IC=true;
 #include "SPI.h"
 #include <semphr.h>
 
-// custom includes
+// custom includes **********************************
+// custom functions
+#include "m_file_functions.h"
 // Interface class ******************************
 #include "interface_class.h"
 INTERFACE_CLASS* interface = new INTERFACE_CLASS();
@@ -117,7 +119,8 @@ mSerial* mserial = new mSerial(true, &UARTserial);
 // File class
 #include "m_file_class.h"
 #include <esp_partition.h>
-#include "FFat.h"
+#include "FS.h"
+#include <LittleFS.h>
 
 FILE_CLASS* drive = new FILE_CLASS(mserial);
 
@@ -151,7 +154,7 @@ BLECharacteristic *pCharacteristicTX, *pCharacteristicRX;
 BLEServer *pServer;
 BLEService *pService;
 
-bool deviceDisconnected_BLE_callback = false;
+
 bool BLE_advertise_Started = false;
 
 bool newValueToSend = false;
@@ -165,16 +168,22 @@ String valueReceived="";
 
 class MyServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
-      interface->BLE_IS_DEVICE_CONNECTED = true;
-      mserial->BLE_IS_DEVICE_CONNECTED = true;
-      deviceDisconnected_BLE_callback=false;
+      interface->setBLEconnectivityStatus (true);
+
       interface->onBoardLED->led[0] = interface->onBoardLED->LED_BLUE;
       interface->onBoardLED->statusLED(100, 1);
-    };
+
+      String dataStr="Connected to the Smart Concrete Maturity device (" + String(interface->firmware_version) + ")"+ String(char(10)) + String(char(13)) +"Type $? or $help to see a list of available commands"+ String(char(10));
+      dataStr+=String(interface->rtc.getDateTime(true))+String(char(10))+String(char(10));
+    
+      if (interface->getNumberWIFIconfigured() == 0 ){
+        dataStr += "no WiFi Networks Configured"+String(char(10)) + String(char(10));
+      }
+      interface->sendBLEstring(dataStr, mserial->DEBUG_TO_BLE);  
+    }
 
     void onDisconnect(BLEServer* pServer) {
-      interface->BLE_IS_DEVICE_CONNECTED = false;
-      mserial->BLE_IS_DEVICE_CONNECTED = false;
+      interface->setBLEconnectivityStatus (false);
       
       interface->onBoardLED->led[0] = interface->onBoardLED->LED_BLUE;
       interface->onBoardLED->statusLED(100, 0.5);
@@ -182,15 +191,13 @@ class MyServerCallbacks: public BLEServerCallbacks {
       interface->onBoardLED->statusLED(100, 0.5);
       interface->onBoardLED->led[0] = interface->onBoardLED->LED_BLUE;
       interface->onBoardLED->statusLED(100, 0.5);
+
       pServer->getAdvertising()->start();
     }
 };
 
 class pCharacteristicTX_Callbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
-      mserial->BLE_IS_DEVICE_CONNECTED=false;
-      delay(10);
-
       String txValue = String(pCharacteristic->getValue().c_str());
       txValue.trim();
       mserial->printStrln("Transmitted TX Value: " + String(txValue.c_str()) );
@@ -241,7 +248,7 @@ long int prevMeasurementMillis;
 
 void setup() { 
   // Firmware Build Version / revision ______________________________
-  interface->firmware_version="1.0.9";
+  interface->firmware_version="1.0.10";
 
   MemLockSemaphoreBLE_RX = xSemaphoreCreateMutex();
 
@@ -282,27 +289,33 @@ void setup() {
   interface->MIN_MCU_FREQUENCY = 10;
   interface-> SERIAL_DEFAULT_SPEED = 115200;
 
+  if ( !interface->loadSettings() ){
+    interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
+    interface->onBoardLED->led[0] = interface->onBoardLED->LED_GREEN;
+    interface->onBoardLED->statusLED(100, 2);
+  }
+
+  interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
+  interface->onBoardLED->statusLED(100, 0);
+
   //init storage drive
   drive->partition_info();
-  ONBOARD_LED_CLASS* onBoardLED = new ONBOARD_LED_CLASS();
-  if (drive->init(FFat, "storage", 2, mserial,  onBoardLED ) == false)
+  if (drive->init(LittleFS, "storage", 2, mserial,   interface->onBoardLED ) == false)
     while(1);
     
   // Init Maturity  __________________________________________
   maturity-> EXT_PLUG_DI_IO = 6;
   pinMode( maturity->EXT_PLUG_DI_IO, INPUT );
   maturity->init(interface, onBoardSensors, mserial, interface->onBoardLED);
+  
+  // init onboard sensors
+  onBoardSensors->init(interface, mserial);
 
   // ......................................................................................................
   // .......................... END OF IO & PIN CONFIGURATION..............................................
   // ......................................................................................................
 
-  interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
-  interface->onBoardLED->statusLED(100, 0);
   
-  // init onboard sensors
-  onBoardSensors->init(interface, mserial);
-
   /*
   Partition Table Information =========================================================
   8Mb Flash				
@@ -317,15 +330,6 @@ void setup() {
   ====================================================================================
   */
 
-
-  if ( !interface->loadSettings() ){
-    interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
-    interface->onBoardLED->led[0] = interface->onBoardLED->LED_GREEN;
-    interface->onBoardLED->statusLED(100, 2);
-  }
-
-  interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
-  interface->onBoardLED->statusLED(100, 0);
 
   if (SCAN_I2C_BUS){
     onBoardSensors->I2Cscanner();
@@ -368,8 +372,6 @@ void setup() {
   // init BLE 
   BLE_init();
 
-  //interface->add_wifi_network("TheScientist", "angelaalmeidasantossilva");
-
   //init wifi
   mWifi->init(interface, mserial, interface->onBoardLED);
   // init Geo Location
@@ -398,14 +400,13 @@ void setup() {
 
   runningTimeMillis = millis();
   prevMeasurementMillis = millis();
-  Serial.println("Free memory: " + String(esp_get_free_heap_size()) + " bytes\n");
+  Serial.println("Free memory: " + addThousandSeparators( std::string( String(esp_get_free_heap_size() ).c_str() ) ) + " bytes\n");
   
   mserial->printStrln("\nsetup is completed. You may start using the " + String(DEVICE_NAME) );
   mserial->printStrln("Type $? for a List of commands.\n");
 
   interface->onBoardLED->led[0] = interface->onBoardLED->LED_GREEN;
   interface->onBoardLED->statusLED(100, 1);
-
 }
 
 
@@ -451,30 +452,17 @@ void BLE_init(){
 }
 
 // *****************************************************************
-bool welcomeIntroDone=false;
+
 String dataStr="";
 long int eTime;
+long int statusTime = millis();
 // adc_power_release()
 
 
 void loop() {
-  if ( interface->BLE_IS_DEVICE_CONNECTED  && welcomeIntroDone==false ) {
-    delay(3000);
-    welcomeIntroDone=true;
-    dataStr="Connected to the Smart Concrete Maturity device (" + String(interface->firmware_version) + ")"+ String(char(10)) + String(char(13)) +"Type $? or $help to see a list of available commands"+ String(char(10));
-    dataStr+=String(interface->rtc.getDateTime(true))+String(char(10))+String(char(10));
-    
-    if (interface->getNumberWIFIconfigured() == 0 ){
-      dataStr += "no WiFi Networks Configured"+String(char(10)) + String(char(10));
-    }
-
-    interface->sendBLEstring(dataStr); 
-  }
-
 // ................................................................................
-
-  if ( deviceDisconnected_BLE_callback && onBoardSensors->motionShakeDetected(5) && ( interface->CURRENT_CLOCK_FREQUENCY != interface->WIFI_FREQUENCY ) ) {
-    deviceDisconnected_BLE_callback=false;
+  
+  if ( interface->getBLEconnectivityStatus()==false && onBoardSensors->motionShakeDetected(5) && ( interface->CURRENT_CLOCK_FREQUENCY != interface->WIFI_FREQUENCY ) ) {
     changeMcuFreq(interface, interface->WIFI_FREQUENCY);
     interface->onBoardLED->led[0] = interface->onBoardLED->LED_BLUE;
     interface->onBoardLED->statusLED(100, 1);
@@ -484,10 +472,10 @@ void loop() {
     BLE_init();
     runningTimeMillis= millis();
   }
-    
-  if (deviceDisconnected_BLE_callback && interface->CURRENT_CLOCK_FREQUENCY >= interface->WIFI_FREQUENCY){
-      interface->$espunixtimeDeviceDisconnected=millis();
-      deviceDisconnected_BLE_callback=true;
+
+// ............................................................................. 
+  // disconnected for at least 3min
+  if ( ( interface->getBLEconnectivityStatus()==false && ( millis() - interface->$espunixtimeDeviceDisconnected > 180000) ) && interface->CURRENT_CLOCK_FREQUENCY >= interface->WIFI_FREQUENCY){
       btStop();
       delay(100);
       BLEDevice::deinit();
@@ -502,12 +490,10 @@ void loop() {
       interface->onBoardLED->statusLED(100, 2);
     }
   
-
 // ................................................................................
 
   eTime = millis() - prevMeasurementMillis;
-  //ToDo : force BLE dsiconnect after [time] of innactivity
-  if ( interface->BLE_IS_DEVICE_CONNECTED==false && interface->LIGHT_SLEEP_EN && interface->Measurments_EN==true) {
+  if ( interface->getBLEconnectivityStatus()==false && interface->LIGHT_SLEEP_EN && maturity->Measurments_EN==true) {
     if (eTime < maturity->config.MEASUREMENT_INTERVAL ){
       interface->onBoardLED->turnOffAllStatusLED();
       mserial->printStr("Entering light sleep....");
@@ -515,23 +501,26 @@ void loop() {
       delay(100);
       esp_light_sleep_start();
       mserial->printStrln("wake up done.");
-      if ( interface->BLE_IS_DEVICE_CONNECTED){
-        interface->sendBLEstring( "waking up. You may enter any GBRL command now.");
-      }
     }
   }
+  prevMeasurementMillis = millis();
 
+if ( (millis() - statusTime > 2000) && maturity->Measurments_EN == true ){
+    statusTime = millis();
+    interface->onBoardLED->led[1] = interface->onBoardLED->LED_GREEN;
+    interface->onBoardLED->statusLED(100, 0.2);
+    mserial->printStr("#");
+}else if  (millis() - statusTime > 2000){
+    statusTime = millis();
+    interface->onBoardLED->led[1] = interface->onBoardLED->LED_RED;
+    interface->onBoardLED->statusLED(100, 0.2);
+    mserial->printStr("#");
+}
 // ................................................................................ 
   // check for measurement interval time and do measurement data collection from the DS18b20
   maturity->request_measurment_data();
 
   if (maturity->hasNewMeasurementValues==true ){
-    prevMeasurementMillis=millis();
-  }
-
-// ................................................................................
-
-  if (maturity->hasNewMeasurementValues==true  && (millis() != prevMeasurementMillis) ) {
     float maturityVal = maturity->custom_maturity(maturity->DATASET_NUM_SAMPLES);
     float strenghtVal = maturity->custom_strenght(maturity->DATASET_NUM_SAMPLES);
 
@@ -543,29 +532,29 @@ void loop() {
     dataStr += String(char(10) + String(char(10)) );
     
     bool sendTo= mSerial::DEBUG_BOTH_USB_UART;
-    if (interface->BLE_IS_DEVICE_CONNECTED )
+    if (interface->getBLEconnectivityStatus() )
       sendTo = mSerial::DEBUG_BOTH_USB_UART_BLE;      
     
     interface->sendBLEstring( dataStr, sendTo);
 
     maturity->hasNewMeasurementValues=false;
   }
-  
   // ................................................................................
 
   geoLocation.get_ip_geo_location_data();
-  dataverse->UploadToDataverse(interface->BLE_IS_DEVICE_CONNECTED);
-
+  dataverse->UploadToDataverse(interface->getBLEconnectivityStatus());
  // ................................................................................    
+
   if (mserial->readSerialData()){
     GBRLcommands(mserial->serialDataReceived, mserial->DEBUG_TO_USB);
   }
-
  // ................................................................................    
+
   if (mserial->readUARTserialData()){
     GBRLcommands(mserial->serialUartDataReceived, mserial->DEBUG_TO_UART);
   }
 // ................................................................................
+
   if (newCMDarrived){
     xSemaphoreTake(MemLockSemaphoreBLE_RX, portMAX_DELAY); 
       newCMDarrived=false; // this needs to be the last line       
@@ -577,44 +566,46 @@ void loop() {
 
   if ( interface->forceFirmwareUpdate == true )
     forceFirmwareUpdate();
-    
-}
-// ********************************************
+
+} // LOOP END
+//  ********************************************
+
 void GBRLcommands(String command, uint8_t sendTo){
-    if (gbrl.commands(command, sendTo) == false){
-      if( onBoardSensors->commands(command, sendTo ) == false){
-        if (mWifi->gbrl_commands(command, sendTo ) == false){    
-          if (maturity->gbrl_commands(command, sendTo ) == false){
-            if( dataverse->gbrl_commands(command, sendTo ) == false){
-              if ($BLE_CMD.indexOf("$")==-1 || $BLE_CMD.indexOf("$")>0){
-                interface->sendBLEstring("$ CMD ERROR \r\n");
-              }else{
-                interface->sendBLEstring("$ CMD UNK \r\n");
-              }
+  if (gbrl.commands(command, sendTo) == false){
+    if( onBoardSensors->commands(command, sendTo ) == false){
+      if (mWifi->gbrl_commands(command, sendTo ) == false){    
+        if (maturity->gbrl_commands(command, sendTo ) == false){
+          if( dataverse->gbrl_commands(command, sendTo ) == false){
+            if ($BLE_CMD.indexOf("$")==-1 || $BLE_CMD.indexOf("$")>0){
+              interface->sendBLEstring("$ CMD ERROR \r\n", sendTo);
+            }else{
+              interface->sendBLEstring("$ CMD UNK \r\n", sendTo);
             }
           }
         }
       }
     }
+  }
 }
 // *******************************************************************************************
+
 void forceFirmwareUpdate(){
     interface->forceFirmwareUpdate=false;
 
     if( WiFi.status() != WL_CONNECTED ){
       if (interface->getNumberWIFIconfigured()>0){
-        if ( interface->BLE_IS_DEVICE_CONNECTED)
+        if ( interface->getBLEconnectivityStatus())
             interface->sendBLEstring("connecting to a wifi network. one moment...");
         
         mWifi->start(10000, 5); // TTL , n attempts 
         delay(500);
 
-        if ( interface->BLE_IS_DEVICE_CONNECTED)
+        if ( interface->getBLEconnectivityStatus())
             interface->sendBLEstring("done.\n");
       
       }else{
         mserial->printStrln("Firmware: No Wifi networks configured");
-        if ( interface->BLE_IS_DEVICE_CONNECTED)
+        if ( interface->getBLEconnectivityStatus())
           interface->sendBLEstring("Firmware: No Wifi networks configured.\n");
         
         interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
@@ -625,7 +616,7 @@ void forceFirmwareUpdate(){
 
   if(WiFi.status() != WL_CONNECTED){
     mserial->printStrln("Firmware: Wifi not connected.");
-    if ( interface->BLE_IS_DEVICE_CONNECTED)
+    if ( interface->getBLEconnectivityStatus())
       interface->sendBLEstring("Firmware: Wifi not connected.\n");
     
     interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
@@ -633,19 +624,19 @@ void forceFirmwareUpdate(){
     return;   
   }
 
-  if ( interface->BLE_IS_DEVICE_CONNECTED){
+  if ( interface->getBLEconnectivityStatus()){
     interface->sendBLEstring("requesting internet IP ...");
     delay(500);
   }
   geoLocation.get_ip_address();
   
-  if ( interface->BLE_IS_DEVICE_CONNECTED){
+  if ( interface->getBLEconnectivityStatus()){
     interface->sendBLEstring("done. \nrequesting Geo Location data ...");
     delay(500);
   }
   geoLocation.get_ip_geo_location_data();
   
-  if ( interface->BLE_IS_DEVICE_CONNECTED){
+  if ( interface->getBLEconnectivityStatus()){
     if ( interface->geoLocationInfoJson.containsKey("country") && interface->geoLocationInfoJson.containsKey("regionName") ){
       mserial->printStrln("done. \n Country:" + String(interface->geoLocationInfoJson["country"].as<char*>()) + "\n Region: " + String(interface->geoLocationInfoJson["regionName"].as<char*>()) + "\n");
       interface->sendBLEstring("done. \n Country:" + String(interface->geoLocationInfoJson["country"].as<char*>()) + "\n Region: " + String(interface->geoLocationInfoJson["regionName"].as<char*>()) + "\n");
@@ -653,14 +644,14 @@ void forceFirmwareUpdate(){
     }
   }
   // Local RTC
-  if ( interface->BLE_IS_DEVICE_CONNECTED){
+  if ( interface->getBLEconnectivityStatus()){
     interface->sendBLEstring("syncronizing with a Internet Time server...");
     delay(500);
   }
   interface->init_NTP_Time();
   mWifi->updateInternetTime();
   
-  if ( interface->BLE_IS_DEVICE_CONNECTED){
+  if ( interface->getBLEconnectivityStatus()){
     delay(500);
     interface->sendBLEstring("done. \nRequesting the lastest firmware revision....");
     delay(500);
@@ -686,7 +677,7 @@ void forceFirmwareUpdate(){
     interface->onBoardLED->led[0] = interface->onBoardLED->LED_BLUE;
     interface->onBoardLED->statusLED(100,0); 
     mserial->printStrln("new firmware version found. Starting update ...");
-    if ( interface->BLE_IS_DEVICE_CONNECTED){
+    if ( interface->getBLEconnectivityStatus()){
       delay(500);
       interface->sendBLEstring("done. \nNew firmware version found. Starting to download and upodate. The Device will reboot when completed. ");
       delay(500);
@@ -697,7 +688,7 @@ void forceFirmwareUpdate(){
     return;
   }else{
     mserial->printStrln("no firmware update needed.");
-    if ( interface->BLE_IS_DEVICE_CONNECTED){
+    if ( interface->getBLEconnectivityStatus()){
       delay(500);
       interface->sendBLEstring("done. \nNo new firmware available");
       delay(500);
@@ -707,5 +698,4 @@ void forceFirmwareUpdate(){
   }
 
   WiFi.disconnect(true);
-
 }

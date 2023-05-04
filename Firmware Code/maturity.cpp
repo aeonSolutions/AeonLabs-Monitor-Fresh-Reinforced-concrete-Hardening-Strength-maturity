@@ -38,7 +38,8 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
 #include "m_math.h"
 #include "onboard_sensors.h"
 #include "esp32-hal-psram.h"
-#include "FFat.h"
+#include "FS.h"
+#include <LittleFS.h>
 // unique figerprint data ID 
 #include "m_atsha204.h"
 
@@ -55,10 +56,15 @@ void MATURITY_CLASS::init(INTERFACE_CLASS* interface, ONBOARD_SENSORS* onBoardSe
 
     this->onewire = OneWire(this->EXT_PLUG_DI_IO); 
     this->sensors= DallasTemperature(&onewire);    
+    this->sensors.begin();    // initialize the DS18B20 sensor
     
     this->last_measured_probe_temp=-1;
     this->last_measured_time_delta=-1;     
     this->DATASET_NUM_SAMPLES=0;
+    
+    this->Measurments_EN = false;
+    this->Measurments_NEW=false;
+    this->measurement_Start_Time = "-1";
 
     this->interface->config.POWER_PLUG_ALWAYS_ON=false;
     
@@ -107,7 +113,7 @@ void MATURITY_CLASS::init(INTERFACE_CLASS* interface, ONBOARD_SENSORS* onBoardSe
 
 // ************************************************
 void MATURITY_CLASS::ProbeSensorStatus(uint8_t sendTo){
-    this->sensors.begin();    // initialize the DS18B20 sensor
+
 
     String dataStr="";
 
@@ -163,7 +169,7 @@ int MATURITY_CLASS::get_dataset_size(){
         return;
     }
 
-    File file = FFat.open("/" + this->interface->config.SENSOR_DATA_FILENAME, "r");
+    File file = LittleFS.open("/" + this->interface->config.SENSOR_DATA_FILENAME, "r");
     int counter=0; 
     
     //String var[8]= {"a","h","pt","dt","p","m","t","u"};
@@ -352,19 +358,19 @@ double MATURITY_CLASS::custom_strenght(int pos){
     time_t timeNow;
 
     // GBRL start command not received
-    if (this->interface->Measurments_EN==false)
+    if (this->Measurments_EN==false)
         return;
         
     // GBRL New command received
-    if (this->interface->Measurments_NEW){
-        this->reinitialize_dataset_file(FFat);
-        this->interface->Measurments_NEW=false;
+    if (this->Measurments_NEW){
+        this->reinitialize_dataset_file(LittleFS);
+        this->Measurments_NEW=false;
         this->interface->$espunixtimeStartMeasure=millis();
-        this->interface->$espunixtimePrev = this->interface->$espunixtimeStartMeasure;
+        this->prevTimeMeasured = this->interface->$espunixtimeStartMeasure;
         this->mserial->printStr(" Measurements started."); 
     }
 
-    if ( ( millis() - this->interface->$espunixtimePrev) < this->config.MEASUREMENT_INTERVAL ){ 
+    if ( ( millis() - this->prevTimeMeasured) < this->config.MEASUREMENT_INTERVAL ){ 
         return;
     }
 
@@ -376,8 +382,8 @@ double MATURITY_CLASS::custom_strenght(int pos){
     }
             
     // ToDo: time diff error 
-    this->last_measured_time_delta = millis() - this->interface->$espunixtimePrev;
-    this->interface->$espunixtimePrev = millis();
+    this->last_measured_time_delta = millis() - this->prevTimeMeasured;
+    this->prevTimeMeasured = millis();
 
     this->mserial->printStrln("Time diff (s) = " + String(this->last_measured_time_delta) );
 
@@ -397,7 +403,7 @@ double MATURITY_CLASS::custom_strenght(int pos){
     this->onBoardSensors->request_onBoard_Sensor_Measurements();
     
     // Save data to the dataset file
-    this->save_measurment_record(FFat);    
+    this->save_measurment_record(LittleFS);    
     // __________________________________________________________________________
 
     //Disable PWR on the PLUG
@@ -410,21 +416,21 @@ double MATURITY_CLASS::custom_strenght(int pos){
 
 // -------------------------------------------------------------------------
 bool MATURITY_CLASS::reinitialize_dataset_file(fs::FS &fs){
-    this->readSettings(FFat);
+    this->readSettings(LittleFS);
     if (fs.exists( "/" +  this->interface->config.SENSOR_DATA_FILENAME ) ){
         if( fs.remove( "/" +  this->interface->config.SENSOR_DATA_FILENAME ) !=true ){
             this->mserial->printStrln("Error removing old dataset file" , this->mserial->DEBUG_TYPE_ERRORS);
             return false;
         }  
     }
-    auto datasetFile = fs.open("/" +  this->interface->config.SENSOR_DATA_FILENAME , FILE_WRITE); 
+    File datasetFile = fs.open("/" +  this->interface->config.SENSOR_DATA_FILENAME , FILE_WRITE); 
     if (datasetFile){
         this->mserial->printStrln("reinitializing the dataset file [" + String(this->interface->config.SENSOR_DATA_FILENAME) +"]" );
         
         String dataStr="Local DateTime; Start Time(s); Time Delta (s);Probe Temp (*C); Onboard Temp(*C); Onboard Humidity(%); MCU Temp(*C); Onboard Motion X;Onboard Motion Y;Onboard Motion Z;";
         dataStr += "Onboard YAW motion X;Onboard YAW motion Y;Onboard YAW motion Z;";
         dataStr += "Unique FingerPrint ID (UFPID); Previous UFPID; Internet IP addr; GeoLocation Timestamp; Latitude; Longitude;" + String(char(10));
-        dataStr+= "Start time(s):;" + String( this->interface->$espunixtimeStartMeasure ) + String(char(10));
+        dataStr+= "Start time(s):;" + String( this->measurement_Start_Time ) + String(char(10));
         datasetFile.print(dataStr);
         
         datasetFile.close();
@@ -432,7 +438,7 @@ bool MATURITY_CLASS::reinitialize_dataset_file(fs::FS &fs){
         this->hasNewMeasurementValues=false;
         return true;
     }else{
-        this->mserial->printStrln("Error openning  " + this->interface->config.SENSOR_DATA_FILENAME , this->mserial->DEBUG_TYPE_ERRORS);
+        this->mserial->printStrln("Error creating " + this->interface->config.SENSOR_DATA_FILENAME , this->mserial->DEBUG_TYPE_ERRORS);
         this->onboardLED->statusLED( (uint8_t*)(const uint8_t[]){this->onboardLED->LED_RED}, 100,5); 
         return false;
     }
@@ -440,7 +446,7 @@ bool MATURITY_CLASS::reinitialize_dataset_file(fs::FS &fs){
 
 // -----------------------------------------------------------------------------------
 bool MATURITY_CLASS::save_measurment_record(fs::FS &fs){    
-    auto datasetFile = fs.open("/" +  this->interface->config.SENSOR_DATA_FILENAME , FILE_APPEND); 
+    File datasetFile = fs.open("/" +  this->interface->config.SENSOR_DATA_FILENAME , FILE_APPEND); 
     if (datasetFile){      
         String dataStr = String( interface->rtc.getDateTime(true) ) + ";" +  String( this->interface->$espunixtimeStartMeasure )  + ";";
         dataStr += String( this->last_measured_time_delta ) + ";" +  String(roundFloat(this->last_measured_probe_temp ,2)) + ";";
@@ -490,7 +496,7 @@ bool MATURITY_CLASS::saveSettings(fs::FS &fs){
     if (fs.exists("/maturity.cfg") )
         fs.remove("/maturity.cfg");
 
-    File settingsFile = fs.open("/maturity.cfg", FILE_WRITE); 
+    File settingsFile = fs.open("/storage/maturity.cfg", FILE_WRITE); 
     if ( !settingsFile ){
         this->mserial->printStrln("error creating maturity settings file.");
         return false;
@@ -618,7 +624,7 @@ bool MATURITY_CLASS::gbrl_commands(String $BLE_CMD, uint8_t sendTo){
     }
 
     if( $BLE_CMD == "$me status"){
-        if( this->interface->Measurments_EN == false){
+        if( this->Measurments_EN == false){
             dataStr = String("Measurements not started\n\n");
         } else{
             dataStr = String("Measurement started already\n");
@@ -629,23 +635,24 @@ bool MATURITY_CLASS::gbrl_commands(String $BLE_CMD, uint8_t sendTo){
         return true;
     }
     if( $BLE_CMD == "$me new"){
-        this->interface->Measurments_NEW=true;
-        this->interface->Measurments_EN=false;
+        this->Measurments_NEW=true;
+        this->Measurments_EN=false;
         this->DATASET_NUM_SAMPLES=0;
         dataStr=String("New Measurement Dataset started\n\n");
         this->interface->sendBLEstring( dataStr, sendTo); 
         return true;
     }
     if($BLE_CMD == "$me start"){
-        if (this->interface->Measurments_EN){
-            dataStr = "Measurments already Started on " + this->interface->measurement_Start_Time + "\n\n";
+        if (this->Measurments_EN){
+            dataStr = "Measurments already Started on " + String(this->measurement_Start_Time) + String("\n\n");
             this->interface->sendBLEstring( dataStr, sendTo); 
         }else{
             this->DATASET_NUM_SAMPLES=0;
-            this->interface->Measurments_NEW=true;
-            this->interface->measurement_Start_Time = this->interface->rtc.getDateTime(true);
-            this->interface->Measurments_EN=true;
-            dataStr = "Measurments Started on " + this->interface->measurement_Start_Time + "\n";
+            this->Measurments_NEW=true;
+            this->Measurments_EN=true;
+            this->measurement_Start_Time = this->interface->rtc.getDateTime(true);
+
+            dataStr = "Measurments Started on " + String(this->measurement_Start_Time) + String("\n");
             this->interface->sendBLEstring( dataStr, sendTo); 
             
             this->gbrl_summary_measurement_config(sendTo);
@@ -654,10 +661,10 @@ bool MATURITY_CLASS::gbrl_commands(String $BLE_CMD, uint8_t sendTo){
 
     }
     if( $BLE_CMD=="$me end"){
-        if(this->interface->Measurments_EN==false){
+        if(this->Measurments_EN==false){
             dataStr="Measurments already ended" + String( char(10));
         }else{
-            this->interface->Measurments_EN=false;
+            this->Measurments_EN=false;
             dataStr="Measurments Ended on " + String(this->interface->rtc.getDateTime(true)) + String( char(10));
         }
         this->interface->sendBLEstring( dataStr, sendTo); 
@@ -758,7 +765,7 @@ bool MATURITY_CLASS::gbrl_menu_custom_model(String $BLE_CMD, uint8_t sendTo){
         if (err == "MODEL OK"){
             dataStr="model expression validated";
             this->config.custom_maturity_equation=$BLE_CMD;
-            this->saveSettings(FFat);
+            this->saveSettings(LittleFS);
         }else{
             dataStr= "E:" + err;
         }
@@ -772,7 +779,7 @@ bool MATURITY_CLASS::gbrl_menu_custom_model(String $BLE_CMD, uint8_t sendTo){
         if (err == "MODEL OK"){
             dataStr="model expression validated";
             this->config.custom_strenght_equation=$BLE_CMD;
-            this->saveSettings(FFat);
+            this->saveSettings(LittleFS);
         }else{
             dataStr= "E:" + err;
         }
@@ -800,7 +807,7 @@ bool MATURITY_CLASS::cfg_commands(String $BLE_CMD, uint8_t sendTo){
             long int val= (long int) value.toInt();
             if(val>0){
                 this->config.MEASUREMENT_INTERVAL=val*1000; // mili seconds 
-                this->saveSettings(FFat);
+                this->saveSettings(LittleFS);
 
                 hourT = (long int) ( this->config.MEASUREMENT_INTERVAL/(3600*1000) );
                 minT  = (long int) ( this->config.MEASUREMENT_INTERVAL/(60*1000) - (hourT*60));
@@ -862,7 +869,7 @@ bool MATURITY_CLASS::history(String $BLE_CMD, uint8_t sendTo){
     
     dataStr = "Data History" +String(char(10));
 
-    File file = FFat.open("/" + this->interface->config.SENSOR_DATA_FILENAME, "r");
+    File file = LittleFS.open("/" + this->interface->config.SENSOR_DATA_FILENAME, "r");
     int counter=0; 
 
     long int sumTimeDelta=0;

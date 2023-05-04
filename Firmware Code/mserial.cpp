@@ -35,6 +35,7 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
 #include "mserial.h"
 #include <Arduino.h>
 #include <semphr.h>
+#include "m_file_functions.h"
 
 // **************************** == Serial Class == ************************
 mSerial::mSerial(bool DebugMode, HardwareSerial* UARTserial) {
@@ -64,7 +65,7 @@ void mSerial::start(int baud) {
     Serial.begin(115200);
     this->UARTserial->begin(baud);
     Serial.println("mSerial started on the USB PORT.");
-    
+  
     this->UARTserial->println("mSerial started on the UART PORT.");
   }
 }
@@ -81,6 +82,8 @@ void mSerial::printStr(String str, uint8_t debugType, uint8_t DEBUG_TO ) {
 
 // ----------------------------------------------------------
   void mSerial::log( String str, uint8_t debugType, uint8_t DEBUG_TO ){
+    String mem = "Free memory: " + addThousandSeparators( std::string( String(esp_get_free_heap_size() ).c_str() ) )  + " bytes\n";
+
     if (this->DEBUG_EN && ( this->DEBUG_TYPE == debugType || this->DEBUG_TYPE == this->DEBUG_TYPE_VERBOSE ) ) {
       if ( ( this->DEBUG_TO == this->DEBUG_TO_BLE || this->DEBUG_TO == this->DEBUG_TO_BLE_UART )  ){
           if (this->BLE_IS_DEVICE_CONNECTED)
@@ -89,15 +92,17 @@ void mSerial::printStr(String str, uint8_t debugType, uint8_t DEBUG_TO ) {
 
       if ( this->DEBUG_TO == this->DEBUG_TO_UART || this->DEBUG_TO == this->DEBUG_TO_BLE_UART || this->DEBUG_TO == this->DEBUG_BOTH_USB_UART){ // debug to UART
         xSemaphoreTake(MemLockSemaphoreSerial, portMAX_DELAY); // enter critical section
-          this->UARTserial->flush();
+          this->UARTserial->print(mem);
           this->UARTserial->print(str);
+          this->UARTserial->flush();
         xSemaphoreGive(MemLockSemaphoreSerial); // exit critical section    
       }
       
       if ( this->DEBUG_TO == this->DEBUG_TO_USB || this->DEBUG_TO == this->DEBUG_TO_BLE_UART  || this->DEBUG_TO == this->DEBUG_BOTH_USB_UART ){ // debug to USB
         xSemaphoreTake(MemLockSemaphoreUSBSerial, portMAX_DELAY); // enter critical section
-          Serial.flush();
+          Serial.print(mem);
           Serial.print(str);
+          Serial.flush();
         xSemaphoreGive(MemLockSemaphoreUSBSerial); // exit critical section    
       }
 

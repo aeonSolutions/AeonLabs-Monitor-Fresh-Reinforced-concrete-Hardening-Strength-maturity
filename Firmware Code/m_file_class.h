@@ -37,7 +37,8 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
 #include "onboard_led.h"
 
 #include <esp_partition.h>
-#include "FFat.h"
+#include "FS.h"
+#include <LittleFS.h>
 
 #ifndef FILE_CLASS_DEF
   #define FILE_CLASS_DEF
@@ -53,12 +54,12 @@ class FILE_CLASS  {
   public:
 
     FILE_CLASS(mSerial* mserial); 
-    bool init( fs::FS &fs, String partitionName,  uint8_t maxFiles,  mSerial* mserial, ONBOARD_LED_CLASS* onboardLED);
+    bool init( fs::LittleFSFS &fs, String partitionName,  uint8_t maxFiles,  mSerial* mserial, ONBOARD_LED_CLASS* onboardLED);
     void partition_info();
 
-    void storage_list_files(fs::FS &fs);
-    bool storage_test_write_file(fs::FS &fs);  
-    bool storage_test_read_file(fs::FS &fs);
+    void storage_list_files(fs::FS  &fs);
+    bool storage_test_write_file(fs::FS  &fs);  
+    bool storage_test_read_file(fs::FS  &fs);
     void printDirectory(File dir, int numTabs);
 
 };

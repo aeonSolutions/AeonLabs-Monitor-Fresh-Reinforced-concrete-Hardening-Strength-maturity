@@ -111,6 +111,19 @@ void INTERFACE_CLASS::settings_defaults(){
   this->forceFirmwareUpdate=false;
 
   this->clear_wifi_networks();
+  
+   this->mserial->printStrln("settings defaults loaded.");
+}
+// ****************************************************
+void INTERFACE_CLASS::setBLEconnectivityStatus(bool status){
+  this->BLE_IS_DEVICE_CONNECTED = status;
+  this->mserial->BLE_IS_DEVICE_CONNECTED= status;
+  if (status == false)
+    this->$espunixtimeDeviceDisconnected = millis();
+}
+// ........................................
+bool INTERFACE_CLASS::getBLEconnectivityStatus(){
+  return this->BLE_IS_DEVICE_CONNECTED;
 }
 
 // ****************************************************
@@ -162,8 +175,6 @@ void INTERFACE_CLASS::init_NTP_Time(char* ntpServer_, long gmtOffset_sec_, int d
 void INTERFACE_CLASS::sendBLEstring(String message,  uint8_t sendTo ){
   if (sendTo == mSerial::DEBUG_NONE )
     return;
-
-  this->mserial->printStrln("Free memory: " + String(esp_get_free_heap_size()) + " bytes");
   
   if( message == "")
       message= "empty message found.\n";

@@ -89,8 +89,8 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
       mSerial(bool DebugMode, HardwareSerial* UARTserial);
       void start(int baud);
 
-      void printStrln( String str,   uint8_t debugType = mSerial::DEBUG_TYPE_VERBOSE , uint8_t DEBUG_TO = mSerial::DEBUG_TO_UART ); // default DEBUG_TYPE_VERBOSE
-      void printStr( String str,  uint8_t debugType = mSerial::DEBUG_TYPE_VERBOSE, uint8_t DEBUG_TO = mSerial::DEBUG_TO_UART  );
+      void printStrln( String str,   uint8_t debugType = mSerial::DEBUG_TYPE_VERBOSE , uint8_t DEBUG_TO = mSerial::DEBUG_BOTH_USB_UART ); // default DEBUG_TYPE_VERBOSE
+      void printStr( String str,  uint8_t debugType = mSerial::DEBUG_TYPE_VERBOSE, uint8_t DEBUG_TO = mSerial::DEBUG_BOTH_USB_UART  );
       
       void sendBLEstring(String message, uint8_t sendTo = mSerial::DEBUG_TO_BLE);
       bool readSerialData();

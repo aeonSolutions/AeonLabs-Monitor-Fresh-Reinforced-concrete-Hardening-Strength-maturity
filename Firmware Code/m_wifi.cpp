@@ -55,7 +55,6 @@ void M_WIFI_CLASS::init(INTERFACE_CLASS* interface, mSerial* mserial, ONBOARD_LE
     this->mserial->printStr("init wifi ...");
     this->interface=interface;
     this->onboardLED=onboardLED;
-    this->wifiMulti= new WiFiMulti();
     this->HTTP_TTL= 20000; // 20 sec TTL
     this->lastTimeWifiConnectAttempt=millis();
     this->mserial->printStrln("done");
@@ -71,7 +70,10 @@ bool M_WIFI_CLASS::start(uint32_t  connectionTimeout, uint8_t numberAttempts){
       this->mserial->printStrln("WIFI: You need to add a wifi network first", this->mserial->DEBUG_TYPE_ERRORS);
       return false;
     }
-    
+    if (this->wifiMulti != nullptr)
+        delete this->wifiMulti;
+        this->wifiMulti = nullptr;
+
     this->wifiMulti= new WiFiMulti();
     WiFi.mode(WIFI_AP_STA);
 
@@ -141,8 +143,7 @@ bool M_WIFI_CLASS::connect2WIFInetowrk(uint8_t numberAttempts){
 // ********************************************************
  void M_WIFI_CLASS::resumeStandbyMode(){
     WiFi.disconnect(true);
-    if (this->interface->BLE_IS_DEVICE_CONNECTED == false){
-      this->interface->$espunixtimeDeviceDisconnected=millis();
+    if ( this->interface->getBLEconnectivityStatus() == false){
       //WiFi.mode(WIFI_OFF);
       changeMcuFreq(interface, this->interface->MIN_MCU_FREQUENCY);
     }   

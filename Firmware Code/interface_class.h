@@ -62,6 +62,8 @@ class INTERFACE_CLASS {
   private:
     uint8_t number_WIFI_networks;
 
+     bool BLE_IS_DEVICE_CONNECTED; 
+  
   public:
     bool LIGHT_SLEEP_EN;
 
@@ -138,8 +140,6 @@ class INTERFACE_CLASS {
     
    // *********************** BLE **************************
      BLECharacteristic *pCharacteristicTX;  
-     bool BLE_IS_DEVICE_CONNECTED; 
-   
 
    // Task scheduler *********************************
     unsigned long $espunixtime;
@@ -178,6 +178,9 @@ class INTERFACE_CLASS {
     void init(mSerial* mserial, bool DEBUG_ENABLE);
     void init_BLE(BLECharacteristic *pCharacteristicTX);
     void settings_defaults();
+
+    void setBLEconnectivityStatus(bool status);
+    bool getBLEconnectivityStatus();
 
     bool loadSettings(fs::FS &fs=FFat );
     bool saveSettings(fs::FS &fs=FFat );

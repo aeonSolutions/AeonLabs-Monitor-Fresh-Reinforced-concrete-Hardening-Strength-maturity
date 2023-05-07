@@ -39,7 +39,8 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
   #include "mserial.h"
   #include "interface_class.h"
   #include "onboard_sensors.h"
-  #include "FFat.h"
+  #include "FS.h"
+  #include <LittleFS.h>
   #include <ArduinoJson.h>
   #include "m_wifi.h"
 
@@ -106,8 +107,8 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
 
     void init(INTERFACE_CLASS* interface,  M_WIFI_CLASS* mWifi, mSerial* mserial);
     
-    bool readSettings(fs::FS &fs=FFat);
-    bool saveSettings(fs::FS &fs=FFat);
+    bool readSettings(fs::FS &fs = LittleFS );
+    bool saveSettings(fs::FS &fs = LittleFS );
 
     void UploadToDataverse(bool ble_connected);
     String GetInfoFromDataverse(String url);

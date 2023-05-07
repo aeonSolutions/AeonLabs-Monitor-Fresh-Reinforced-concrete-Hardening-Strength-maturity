@@ -66,7 +66,8 @@ Where,
   #include "mserial.h"
   #include "interface_class.h"
   #include "onboard_sensors.h"
-  #include "FFat.h"
+   #include "FS.h"
+   #include <LittleFS.h>
   #include "onboard_led.h"
   #include "tinyexpr.h"
 
@@ -133,18 +134,18 @@ Where,
 
     int get_dataset_size();
     int get_dataset_memory_availability();   
-    bool reinitialize_dataset_file(fs::FS &fs);
+    bool reinitialize_dataset_file( fs::FS &fs = LittleFS );
     void get_dataset_values(int pos);
 
     void request_measurment_data();
-    bool save_measurment_record(fs::FS &fs);
+    bool save_measurment_record( fs::FS &fs = LittleFS );
 
     double custom_strenght(int pos);
     double custom_maturity(int pos);
 
     // Setup configuration and settings *******************************************
-    bool readSettings(fs::FS &fs=FFat);
-    bool saveSettings(fs::FS &fs=FFat);
+    bool readSettings( fs::FS &fs = LittleFS );
+    bool saveSettings( fs::FS &fs = LittleFS  );
 
 
    // GBRL commands  *********************************************

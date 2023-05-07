@@ -69,7 +69,7 @@ void ONBOARD_SENSORS::init(INTERFACE_CLASS* interface, mSerial* mserial){
     this->prevReadings[3]=0.0;
     this->prevReadings[4]=0.0;
     this->prevReadings[5]=0.0;
-    this->ROLL_THRESHOLD  = 1.4;   
+    this->ROLL_THRESHOLD  = 8.5;   
     this->numtimesBeforeDetectMotion=5;
     this->numtimesMotionDetected=0;
 
@@ -187,6 +187,25 @@ bool ONBOARD_SENSORS::motionShakeDetected(uint8_t numShakes){
   return false;
 };
 
+// **********************************************
+void ONBOARD_SENSORS::initRollTheshold(){
+    this->mserial->printStr("Calibration of motion detection.Dont move the device..");
+    float X, Y, Z, totalAccel;
+    for (int i=0; i<10; i++) {
+      X += this->LSM6DS3_Motion_X;
+      Y += this->LSM6DS3_Motion_Y;
+      Z += this->LSM6DS3_Motion_Z;
+      delay(1);
+    }
+    X /= 10;
+    Y /= 10;
+    Z /= 10;
+
+    totalAccel = sqrt(X*X + Y*Y + Z*Z);
+    this->ROLL_THRESHOLD = totalAccel * ( 1.0 + this->interface->config.MOTION_SENSITIVITY); 
+    this->mserial->printStrln("Done.");
+}
+
 // ************************************************************
 bool ONBOARD_SENSORS::motionDetect(){
   time_t timeNow;
@@ -277,6 +296,8 @@ void ONBOARD_SENSORS::I2Cscanner() {
     String dataStr="Onboard sensors commands:\n" \
                     "$sensor port [on/off]           - Enable/ Disable Power on External Ports\n" \
                     "\n" \
+                    "$ms view                        - View motion detection sensitivity\n" \
+                    "$ms set [0;1]                   - Set motion detection sensitivity\n" \                    
                     "$ot                             - View Onboard Temperature data ( " + String(char(176)) + String("C )") +  " )\n" \
                     "$oh                             - View Onboard Humidity data ( % )\n" \
                     "\n" \
@@ -293,7 +314,26 @@ void ONBOARD_SENSORS::I2Cscanner() {
 // *********************************************************
 bool ONBOARD_SENSORS::commands(String $BLE_CMD, uint8_t sendTo){
   String dataStr="";
-  if($BLE_CMD=="$?" || $BLE_CMD=="$help"){
+  
+  if($BLE_CMD.indexOf("$ms ")>-1){
+    if( $BLE_CMD == "$ms view" ){
+      dataStr = "Current motion sensitivity is " + String(this->interface->config.MOTION_SENSITIVITY) + "\n";
+    }else if ($BLE_CMD.indexOf("$ms set ")>-1){
+      String value= $BLE_CMD.substring(8, $BLE_CMD.length());
+      dataStr = "$ CMD ERR";
+      if (isNumeric(value)){
+          double val = (double) value.toDouble();
+          if(val>0.0 and val<1.0){
+            this->interface->config.MOTION_SENSITIVITY = val;
+            dataStr = "new motion sensitivity set: " + String(this->interface->config.MOTION_SENSITIVITY) + "\n";       
+          }
+      }
+    }else{
+      dataStr = "$ CMD ERR";
+    }
+    this->interface->sendBLEstring( dataStr, sendTo); 
+    return true; 
+  }else if($BLE_CMD=="$?" || $BLE_CMD=="$help"){
       return this->helpCommands(sendTo);
   } else if($BLE_CMD=="$ot"){
     this->request_onBoard_Sensor_Measurements();

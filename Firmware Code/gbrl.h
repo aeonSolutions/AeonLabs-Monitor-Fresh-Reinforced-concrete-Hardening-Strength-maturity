@@ -53,10 +53,11 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
       bool powerManagement(String $BLE_CMD, uint8_t sendTo );
       bool plug_status( uint8_t sendTo  );
       bool debug_commands(String $BLE_CMD, uint8_t sendTo  );
-      
+      bool set_device_language(String $BLE_CMD, uint8_t sendTo);
+
     public:
       GBRL();
-      void init(INTERFACE_CLASS* interface, MATURITY_CLASS* maturity, mSerial* mserial);
+      void init(INTERFACE_CLASS* interface, MATURITY_CLASS* maturity, mSerial* mserial, M_WIFI_CLASS* mWifi);
       bool commands(String $BLE_CMD, uint8_t sendTo );
  
 };

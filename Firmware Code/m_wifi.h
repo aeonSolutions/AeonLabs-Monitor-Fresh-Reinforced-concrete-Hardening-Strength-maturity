@@ -36,7 +36,9 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
 #include <WiFiMulti.h>
 #include "onboard_led.h"
 #include <semphr.h>
-#include "WiFiClientSecure.h"
+#include <WiFi.h>
+#include <WiFiClientSecure.h>
+
 
 #ifndef INTERFACE_CLASS_DEF
   #include "interface_class.h"
@@ -100,7 +102,10 @@ void WIFIscanNetworks();
 
 void WIFIevents();
 void updateInternetTime();
-void resumeStandbyMode();
+void resumePowerSavingMode();
+void resumeWifiMode();
+
+bool downloadFileHttpGet(String filename, String httpAddr, uint8_t sendTo);
 
    // GBRL commands  *********************************************
 bool gbrl_commands(String $BLE_CMD, uint8_t sendTo );

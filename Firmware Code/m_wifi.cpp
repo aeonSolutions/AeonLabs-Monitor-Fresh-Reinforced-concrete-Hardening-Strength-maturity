@@ -36,7 +36,7 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
 #include "time.h"
 #include "ESP32Time.h"
 #include "manage_mcu_freq.h"
-
+#include "HTTPClient.h"
 
 #ifndef ESP32PING_H
   #include <ESP32Ping.h>
@@ -57,6 +57,8 @@ void M_WIFI_CLASS::init(INTERFACE_CLASS* interface, mSerial* mserial, ONBOARD_LE
     this->onboardLED=onboardLED;
     this->HTTP_TTL= 20000; // 20 sec TTL
     this->lastTimeWifiConnectAttempt=millis();
+    this->wifiMulti= new WiFiMulti();
+
     this->mserial->printStrln("done");
 }
 
@@ -65,22 +67,27 @@ void M_WIFI_CLASS::init(INTERFACE_CLASS* interface, mSerial* mserial, ONBOARD_LE
 bool M_WIFI_CLASS::start(uint32_t  connectionTimeout, uint8_t numberAttempts){
     this->connectionTimeout=connectionTimeout;
     
-    if (interface->getNumberWIFIconfigured() == 0 && ( millis() - this->lastTimeWifiConnectAttempt > 60000) ){
+    if (interface->getNumberWIFIconfigured() == 0 ){
       this->lastTimeWifiConnectAttempt=millis();
-      this->mserial->printStrln("WIFI: You need to add a wifi network first", this->mserial->DEBUG_TYPE_ERRORS);
+      if ( this->errMsgShown == false ){
+        this->mserial->printStrln("WIFI: You need to add a wifi network first", this->mserial->DEBUG_TYPE_ERRORS);
+        this->errMsgShown = true;
+      }
       return false;
     }
-    if (this->wifiMulti != nullptr)
-        delete this->wifiMulti;
-        this->wifiMulti = nullptr;
-
-    this->wifiMulti= new WiFiMulti();
-    WiFi.mode(WIFI_AP_STA);
+  
+    this->errMsgShown = false;
+    
+    if ( this->interface->CURRENT_CLOCK_FREQUENCY < this->interface->WIFI_FREQUENCY )
+      this->resumeWifiMode();
 
     for(uint8_t i=0; i < 5; i++){
-        if (this->interface->config.ssid[i] !="")
-          this->wifiMulti->addAP(this->interface->config.ssid[i].c_str(), this->interface->config.password[i].c_str());        
+      if (this->interface->config.ssid[i] !="")
+        this->wifiMulti->addAP(this->interface->config.ssid[i].c_str(), this->interface->config.password[i].c_str());        
     }
+
+    WiFi.mode(WIFI_AP_STA);
+  
     this->connect2WIFInetowrk(numberAttempts);
     this->lastTimeWifiConnectAttempt=millis();
     return true;
@@ -98,6 +105,7 @@ bool M_WIFI_CLASS::connect2WIFInetowrk(uint8_t numberAttempts){
       this->mserial->printStrln("C2W: You need to add a wifi network first", this->mserial->DEBUG_TYPE_ERRORS);
       this->errMsgShown = true;
     }
+    this->lastTimeWifiConnectAttempt=millis();
     return false;
   }
   
@@ -114,17 +122,12 @@ bool M_WIFI_CLASS::connect2WIFInetowrk(uint8_t numberAttempts){
     // Connect to Wi-Fi using wifiMulti (connects to the SSID with strongest connection)
     this->mserial->printStr( "# " );
     if(this->wifiMulti->run(this->connectionTimeout) == WL_CONNECTED) {
-        this->mserial->printStrln("\nWiFi connected");
-        this->mserial->printStrln("IP address: ");
-        this->mserial->printStrln(String(WiFi.localIP()));
-        this->mserial->printStr(String(WiFi.SSID()));
-        this->mserial->printStr(" ");
-        this->mserial->printStrln(String(WiFi.RSSI()));
-        
         statusWIFI = WiFi.waitForConnectResult();
-        this->mserial->printStrln("("+String(statusWIFI)+"): "+get_wifi_status(statusWIFI));
+        this->mserial->printStrln("\nWiFi connected ("+ get_wifi_status(statusWIFI) +")");
+        this->mserial->printStrln("IP address: " + String(WiFi.localIP().toString() ) );
+        this->mserial->printStrln( String( WiFi.SSID() ) + " (" + String( WiFi.RSSI() ) + ")" );
+        
         this->WIFIconnected=true;
-        this->mserial->printStr( "." );
         return true;
     }
     
@@ -141,12 +144,25 @@ bool M_WIFI_CLASS::connect2WIFInetowrk(uint8_t numberAttempts){
 }
 
 // ********************************************************
- void M_WIFI_CLASS::resumeStandbyMode(){
+ void M_WIFI_CLASS::resumePowerSavingMode(){
+    mserial->printStrln("WIFI: setting power saving mode.");
     WiFi.disconnect(true);
-    if ( this->interface->getBLEconnectivityStatus() == false){
-      //WiFi.mode(WIFI_OFF);
-      changeMcuFreq(interface, this->interface->MIN_MCU_FREQUENCY);
-    }   
+    delay(100);
+    WiFi.mode(WIFI_MODE_NULL);
+
+    changeMcuFreq(interface, interface->MIN_MCU_FREQUENCY);
+    interface->CURRENT_CLOCK_FREQUENCY = interface->MIN_MCU_FREQUENCY;
+    interface->$espunixtimeDeviceDisconnected = millis();
+ }
+
+// ********************************************************
+ void M_WIFI_CLASS::resumeWifiMode(){
+      mserial->printStrln("WIFI: setting MCU clock to EN WIFI");
+      changeMcuFreq(interface, interface->WIFI_FREQUENCY);
+      interface->CURRENT_CLOCK_FREQUENCY = interface->WIFI_FREQUENCY;
+
+      interface->onBoardLED->led[0] = interface->onBoardLED->LED_BLUE;
+      interface->onBoardLED->statusLED(100, 1);
  }
 
 // ********************************************************
@@ -331,6 +347,92 @@ void M_WIFI_CLASS::updateInternetTime(){
   }
 }
 
+// ******************************************************************
+
+bool M_WIFI_CLASS::downloadFileHttpGet(String filename, String httpAddr, uint8_t sendTo){
+  String dataStr = "";
+
+  if ( LittleFS.exists(filename) ){
+    dataStr = "DW WIFI: File requested already exists. ";
+    this->interface->sendBLEstring( dataStr,  sendTo );  
+    return false;
+  }
+
+ if (WiFi.status() != WL_CONNECTED){
+    this->start(10000, 5); // TTL , n attempts 
+  }
+  
+  if (WiFi.status() != WL_CONNECTED ){
+    if (this->errMsgShown == false){
+      this->errMsgShown = true;
+      this->mserial->printStrln("WIFI DW GET: unable to connect to WIFI.");
+      this->interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
+      this->interface->onBoardLED->statusLED(100, 1);
+    }
+    return false;
+  }
+  
+  File DW_File = LittleFS.open(filename, FILE_WRITE);
+  if ( !DW_File ){
+    if (this->errMsgShown == false){
+      this->errMsgShown = true;
+      this->mserial->printStrln("WIFI DW GET: error creating  file");
+      this->interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
+      this->interface->onBoardLED->statusLED(100, 1);
+    }
+    return false;
+  }
+    HTTPClient http;
+    http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
+    // configure server and url
+    http.begin(httpAddr);
+    // start connection and send HTTP header
+    int httpCode = http.GET();
+    if(httpCode < 1) {
+      dataStr = "HTTP GET failed with error code " + String(http.errorToString(httpCode).c_str()) + " \n";
+      this->interface->sendBLEstring( dataStr,  sendTo );  
+      return false;
+    }
+
+    if(httpCode != HTTP_CODE_OK) {
+      dataStr = "Server returned " + String(httpCode) + " error code\n";
+      this->interface->sendBLEstring( dataStr,  sendTo );  
+      return false;
+    }
+
+    // get length of document (is -1 when Server sends no Content-Length header)
+    int len = http.getSize();
+
+    // create buffer for read
+    uint8_t buff[128] = { 0 };
+
+    // get tcp stream
+    WiFiClient * stream = http.getStreamPtr();
+
+    // read all data from server
+    while(http.connected() && (len > 0 || len == -1)) {
+        // get available data size
+        size_t size = stream->available();
+
+        if(size) {
+            // read up to 128 byte
+            int c = stream->readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
+
+            DW_File.write(buff,c);
+            if(len > 0) {
+                len -= c;
+            }
+        }
+        delay(1);
+  }
+
+  DW_File.close();
+
+  http.end();
+  return true;
+
+}
+
    // GBRL commands  *********************************************
    // ***********************************************************
 bool M_WIFI_CLASS::gbrl_commands(String $BLE_CMD, uint8_t sendTo ){
@@ -372,6 +474,7 @@ bool M_WIFI_CLASS::gbrl_commands(String $BLE_CMD, uint8_t sendTo ){
 bool M_WIFI_CLASS::wifi_commands(String $BLE_CMD, uint8_t sendTo ){
   String dataStr="";
   
+  
   if($BLE_CMD=="$wifi default"){
     this->interface->clear_wifi_networks();
     this->interface->add_wifi_network("SCC WIFI", "1234567890");
@@ -380,7 +483,7 @@ bool M_WIFI_CLASS::wifi_commands(String $BLE_CMD, uint8_t sendTo ){
     dataStr += "Network SSID: \"SCC WIFI\"\n";
     dataStr += "Password: \"1234567890\"\n\n";
     this->interface->sendBLEstring( dataStr,  sendTo ); 
-  return true;
+    return true;
   }  
   
   if($BLE_CMD=="$wifi status"){
@@ -411,7 +514,12 @@ bool M_WIFI_CLASS::wifi_commands(String $BLE_CMD, uint8_t sendTo ){
       mask = "**********";
     }
     this->interface->add_wifi_network(  ssid, pwd );
+    
+    this->interface->sendBLEstring( "smart save settings\n",  sendTo ); 
+    
     this->interface->saveSettings();
+    
+    this->interface->sendBLEstring("end save settings\n",  sendTo ); 
     
     dataStr= mask + "\n";
 
@@ -438,6 +546,7 @@ bool M_WIFI_CLASS::wifi_commands(String $BLE_CMD, uint8_t sendTo ){
     return true;
   }
   // ................................................................
+  
   if (this->selected_menu=="$wifi ssid"){  
       this->wifi_ssid = $BLE_CMD;
       this->selected_menu = "$wifi pwd";

@@ -51,9 +51,13 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
           bool ErrMsgShown;
       public:
           GEO_LOCATION_CLASS();
-          void get_ip_address();
-          void get_ip_geo_location_data(String ipAddress="");
           void init(INTERFACE_CLASS* interface, M_WIFI_CLASS* mWifi,  mSerial* mserial);
+          
+          bool get_ip_address();
+          bool get_ip_geo_location_data(String ipAddress="", bool override = false);
+
+          bool helpCommands(uint8_t sendTo );
+          bool gbrl_commands(String $BLE_CMD, uint8_t sendTo );
   };
 
 #endif

@@ -35,24 +35,59 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
 #include "gbrl.h"
 #include "Arduino.h"
 #include"m_math.h"
-#include "FFat.h"
+#include "FS.h"
+#include <LittleFS.h>
 #include "m_atsha204.h"
 
 GBRL::GBRL() {
 
 }
 
-void GBRL::init(INTERFACE_CLASS* interface, MATURITY_CLASS* maturity, mSerial* mserial){
+void GBRL::init(INTERFACE_CLASS* interface, MATURITY_CLASS* maturity, mSerial* mserial, M_WIFI_CLASS* mWifi){
   this->mserial=mserial;
   this->mserial->printStr("init GBRL ...");
   this->interface=interface;
   this->maturity=maturity;
+  this->mWifi= mWifi;
   this->mserial->printStrln("done.");
 }
 
+// *********************************************************
+ bool GBRL::helpCommands(uint8_t sendTo ){
+    String dataStr="GBRL commands:\n" \
+                    "$help $?                           - View available GBRL commands\n" \
+                    "$dt                                - Device Time\n" \
+                    "$ver                               - Device Firmware Version\n" \
+                    "$uid                               - This Smart Device Unique Serial Number\n" 
+                    "$sleep [on/off]                    - Enable/disable device sleep (save battery power)\n" 
+                    "$sleep status                      - View current device sleep status\n" 
+                    "\n" \
+                    "$firmware update                   - Update the Device with a newer Firmware\n" \
+                    "$firmware cfg [on/auto/manual]     - Configure Firmware updates\n" \
+                    "\n" \
+                    "$settings reset                    - reset Settings to Default values\n" \
+                    "$set pwd [password]                - Set device access password\n" \
+                    "\n" \
+                    "$debug [on/off] [ble/ uart / all]  - Output Debug\n" \
+                    "$debug status                      - View Debug cfg\n" \
+                    "debug repository [on/off]          - Save Debug data in the data repository\n" \
+                    "$debug verbose [on/off]            - Output all debug messages\n" \
+                    "$debug errors [on/off]             - Output only Error messages\n" \
+                    "\n" \
+                    "$lang dw [country code]            - Download a language pack to the smart device (requires internet conn.)\n" \
+                    "$lang set [country code]           - Change the smart device language\n\n";
+
+    this->interface->sendBLEstring( dataStr,  sendTo ); 
+    return false; 
+ }
+// ******************************************************************************************
 
 bool GBRL::commands(String $BLE_CMD, uint8_t sendTo ){
   String dataStr="";
+
+  if($BLE_CMD.indexOf("$lang dw ")>-1){
+    return this->set_device_language($BLE_CMD, sendTo);
+  }
 
   if($BLE_CMD.indexOf("$sleep ")>-1){
     if($BLE_CMD == "$sleep status" ){
@@ -93,9 +128,9 @@ bool GBRL::commands(String $BLE_CMD, uint8_t sendTo ){
   }else if($BLE_CMD.indexOf("$battery ")>-1){
       return this->powerManagement($BLE_CMD,  sendTo );
   }else if($BLE_CMD=="$settings reset"){
-      if (FFat.exists("/settings.cfg") ){
+      if (LittleFS.exists("/settings.cfg") ){
         Serial.println("file exists");
-        if(FFat.remove("/settings.cfg") > 0 ){
+        if(LittleFS.remove("/settings.cfg") > 0 ){
           this->mserial->printStrln("old settings file deleted");          
         }else{
           this->interface->sendBLEstring( "unable to delete settings\n",  sendTo );  
@@ -176,32 +211,7 @@ bool GBRL::runtime(uint8_t sendTo ){
     return true;
 }
 
-// *********************************************************
- bool GBRL::helpCommands(uint8_t sendTo ){
-    String dataStr="GBRL commands:\n" \
-                    "$help $?                           - View available GBRL commands\n" \
-                    "$dt                                - Device Time\n" \
-                    "$ver                               - Device Firmware Version\n" \
-                    "$uid                               - This Smart Device Unique Serial Number\n" 
-                    "$sleep [on/off]                    - Enable/disable device sleep (save battery power)\n" 
-                    "$sleep status                      - View current device sleep status\n" 
-                    "\n" \
-                    "$firmware update                   - Update the Device with a newer Firmware\n" \
-                    "$firmware cfg [on/auto/manual]     - Configure Firmware updates\n" \
-                    "\n" \
-                    "$settings reset                    - reset Settings to Default values\n" \
-                    "$set pwd [password]                - Set device access password\n" \
-                    "\n" \
-                    "$debug [on/off] [ble/ uart / all]  - Output Debug\n" \
-                    "$debug status                      - View Debug cfg\n" \
-                    "debug repository [on/off]          - Save Debug data in the data repository\n" \
-                    "\n" \
-                    "$debug verbose [on/off]            - Output all debug messages\n" \
-                    "$debug errors [on/off]             - Output only Error messages\n\n";
 
-    this->interface->sendBLEstring( dataStr,  sendTo ); 
-    return false; 
- }
 
 
 
@@ -388,4 +398,83 @@ bool GBRL::firmware(String $BLE_CMD, uint8_t sendTo ){
   }
 return true;
 }
+
+// ****************************************
+ bool GBRL::set_device_language(String $BLE_CMD, uint8_t sendTo){
+  String dataStr="";
+
+  if($BLE_CMD.indexOf("$lang dw ")<0){
+    return false;
+  }
+
+  String country = $BLE_CMD.substring(9, $BLE_CMD.length());
+  if (country.length()>3){
+    dataStr="Invalid country code requested \n";
+    this->interface->sendBLEstring( dataStr,  sendTo );  
+    return true;
+  }
+
+  File directory = LittleFS.open("/lang");
+
+    if( directory.isDirectory() == false ){
+    if(LittleFS.mkdir("/lang") == false){
+      dataStr="(421) Error creating lang directory. \n";
+      this->interface->sendBLEstring( dataStr,  sendTo );  
+      return true;
+    }else{
+      dataStr="(425) Language Pack directory created \n";
+      this->interface->sendBLEstring( dataStr,  sendTo );  
+    }
+  }
+    
+  directory.close();
+
+  dataStr="Initializing Language pack download (1/2)... \n";
+  this->interface->sendBLEstring( dataStr,  sendTo );  
+
+ // Request file from the base code repo
+  String filename = country  +".lang";
+  this->mserial->printStrln("filename to request: "+filename); //, mSerial::DEBUG_TYPE_VERBOSE, mSerial::DEBUG_ALL_USB_UART_BLE);
+
+  if (LittleFS.exists( "/lang/" + country  +"_sys.lang" ) )
+    LittleFS.remove( "/lang/" + country  +"_sys.lang" );
+
+
+  String httpAddr = "https://github.com/aeonSolutions/aeonlabs-ESP32-C-Base-Firmware-Libraries/raw/main/translation/" + filename;
+  if ( false == this->mWifi->downloadFileHttpGet("/lang/" + country  +"_sys.lang", httpAddr, sendTo) ){
+    dataStr="Error Installing base language file \n";
+    this->interface->sendBLEstring( dataStr,  sendTo );  
+    return true;
+  }
+
+    dataStr="Language pack download (2/2)... \n";
+    this->interface->sendBLEstring( dataStr,  sendTo );  
+
+ // Request file from the smart device repo
+  filename = country  +".lang";
+  if (LittleFS.exists( "/lang/" + country  +".lang") )
+    LittleFS.remove( "/lang/" + country  +".lang" );
+
+
+  httpAddr = "https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/raw/main/translation/" + filename;
+  if ( false == this->mWifi->downloadFileHttpGet("/lang/" + country  +".lang",  httpAddr, sendTo) ){
+    dataStr="Error Installing the smart device language file \n";
+    this->interface->sendBLEstring( dataStr,  sendTo );  
+    return true;
+  }
+ 
+  dataStr="Download completed. Loading language pack... \n";
+  this->interface->sendBLEstring( dataStr,  sendTo );  
+
+  if (this->interface->loadBaseLanguagePack(country, sendTo) && this-> interface->loadDeviceLanguagePack(country, sendTo) ){
+    this->interface->config.language = country;
+    this->interface->saveSettings();
+  }else{
+      dataStr="(474) Error loading language pack... \n";
+      this->interface->sendBLEstring( dataStr,  sendTo );  
+      return true;
+  }
+
+  return true;
+ }
 

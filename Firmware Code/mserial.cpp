@@ -82,8 +82,8 @@ void mSerial::printStr(String str, uint8_t debugType, uint8_t DEBUG_TO ) {
 
 // ----------------------------------------------------------
   void mSerial::log( String str, uint8_t debugType, uint8_t DEBUG_TO ){
-    String mem = "Free memory: " + addThousandSeparators( std::string( String(esp_get_free_heap_size() ).c_str() ) )  + " bytes\n";
-
+    //String mem = "RAM: " + addThousandSeparators( std::string( String(esp_get_free_heap_size() ).c_str() ) )  + " b >> ";
+    String mem ="";
     if (this->DEBUG_EN && ( this->DEBUG_TYPE == debugType || this->DEBUG_TYPE == this->DEBUG_TYPE_VERBOSE ) ) {
       if ( ( this->DEBUG_TO == this->DEBUG_TO_BLE || this->DEBUG_TO == this->DEBUG_TO_BLE_UART )  ){
           if (this->BLE_IS_DEVICE_CONNECTED)
@@ -107,7 +107,7 @@ void mSerial::printStr(String str, uint8_t debugType, uint8_t DEBUG_TO ) {
       }
 
       if (this->DEBUG_SEND_REPOSITORY){
-          this->saveLog(FFat, str);
+          this->saveLog(LittleFS, str);
       }
     }
   }

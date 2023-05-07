@@ -50,20 +50,25 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
 
 // *************************** MCU frequency **********************************************************************
 void changeMcuFreq(INTERFACE_CLASS* interface, int Freq){
-  delay(1000);
+  Serial.flush();
+  interface->UARTserial->flush();
+  
   setCpuFrequencyMhz(Freq);
   interface->CURRENT_CLOCK_FREQUENCY=Freq;
-  changeSerialBaudRate(interface, Freq);
-} 
-
-void changeSerialBaudRate(INTERFACE_CLASS* interface, uint32_t Freq){
   if (Freq < 80) {
     interface->MCU_FREQUENCY_SERIAL_SPEED = 80 / Freq * interface->SERIAL_DEFAULT_SPEED;
   } else {
     interface->MCU_FREQUENCY_SERIAL_SPEED = interface->SERIAL_DEFAULT_SPEED;
   }
-  interface->UARTserial->end();
+  
+  interface->UARTserial->end();  
+  delay(300);
   interface->UARTserial->begin(interface->MCU_FREQUENCY_SERIAL_SPEED);
   interface->UARTserial->print("The current Serial Baud speed on the UART Port is ");
   interface->UARTserial->println(interface->MCU_FREQUENCY_SERIAL_SPEED);
+} 
+
+void changeSerialBaudRate(INTERFACE_CLASS* interface, uint32_t Freq){
+
+
 }

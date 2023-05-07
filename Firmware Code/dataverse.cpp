@@ -102,21 +102,25 @@ void DATAVERSE_CLASS::UploadToDataverse(bool ble_connected) {
   if ( ( millis() - this->$espunixtimePrev) < this->config.UPLOAD_DATASET_DELTA_TIME )
     return;
     
-
-    if (this->interface->CURRENT_CLOCK_FREQUENCY <= this->interface->WIFI_FREQUENCY )
-      changeMcuFreq(this->interface, this->interface->WIFI_FREQUENCY);
     
-    if (WiFi.status() != WL_CONNECTED){
-      this->mWifi->start(10000, 5); // TTL , n attempts 
-      this->mWifi->updateInternetTime();
+  if (WiFi.status() != WL_CONNECTED){
+    this->mWifi->start(10000, 5); // TTL , n attempts 
+  }
+  
+  if (WiFi.status() != WL_CONNECTED ){
+    if (this->ErrMsgShown == false){
+      this->ErrMsgShown = true;
+      this->mserial->printStrln("DATAVERSE: unable to connect to WIFI.");
+      interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
+      interface->onBoardLED->statusLED(100, 1);
     }
-    if (WiFi.status() != WL_CONNECTED ){
-      if (this->ErrMsgShown == false){
-        this->ErrMsgShown = true;
-        this->mserial->printStrln("DATAVERSE: unable to connect to WIFI.");
-    }
-      return;
-    }
+
+
+    return;
+  }
+  
+  this->ErrMsgShown = false;
+  this->mWifi->updateInternetTime();
   this->$espunixtimePrev= millis();
 
   interface->onBoardLED->led[0] = interface->onBoardLED->LED_BLUE;
@@ -143,7 +147,7 @@ void DATAVERSE_CLASS::UploadToDataverse(bool ble_connected) {
         //this->mserial->printStrln(rawResponse);
         interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
         interface->onBoardLED->statusLED(100, 5);
-        this->mWifi->resumeStandbyMode();
+        this->mWifi->resumePowerSavingMode();
         return;
       }else{
          String stat = datasetObject["status"];
@@ -160,7 +164,7 @@ void DATAVERSE_CLASS::UploadToDataverse(bool ble_connected) {
             }
             interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
             interface->onBoardLED->statusLED(100, 5);
-            this->mWifi->resumeStandbyMode();
+            this->mWifi->resumePowerSavingMode();
             return;
         }
       }
@@ -171,7 +175,7 @@ void DATAVERSE_CLASS::UploadToDataverse(bool ble_connected) {
       }
       interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
       interface->onBoardLED->statusLED(100, 5); 
-      this->mWifi->resumeStandbyMode();
+      this->mWifi->resumePowerSavingMode();
       return;
     }
   }else{
@@ -181,12 +185,12 @@ void DATAVERSE_CLASS::UploadToDataverse(bool ble_connected) {
     }
     interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
     interface->onBoardLED->statusLED(100, 5); 
-    this->mWifi->resumeStandbyMode();
+    this->mWifi->resumePowerSavingMode();
     return;
   }
 
   // Open the dataset file and prepare for binary upload
-  File datasetFile = FFat.open("/"+ this->interface->config.SENSOR_DATA_FILENAME, FILE_READ);
+  File datasetFile = LittleFS.open("/"+ this->interface->config.SENSOR_DATA_FILENAME, FILE_READ);
   if (!datasetFile){
     if (this->ErrMsgShown == false){
       this->ErrMsgShown = true;
@@ -194,7 +198,7 @@ void DATAVERSE_CLASS::UploadToDataverse(bool ble_connected) {
     }
     interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
     interface->onBoardLED->statusLED(100, 5);
-    this->mWifi->resumeStandbyMode();
+    this->mWifi->resumePowerSavingMode();
     return;
   }
     
@@ -225,7 +229,7 @@ void DATAVERSE_CLASS::UploadToDataverse(bool ble_connected) {
         }
       interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
       interface->onBoardLED->statusLED(100, 5);
-      this->mWifi->resumeStandbyMode();
+      this->mWifi->resumePowerSavingMode();
       return;
   }
   this->mserial->printStrln("Connected to the dataverse of Harvard University"); 
@@ -332,7 +336,7 @@ void DATAVERSE_CLASS::UploadToDataverse(bool ble_connected) {
   this->mWifi->client.stop();
 
   interface->onBoardLED->led[0] = interface->onBoardLED->LED_GREEN;
-  interface->onBoardLED->statusLED(100, 2);
+  interface->onBoardLED->statusLED(100, 1);
 }
 
 // *********************************************************
@@ -355,7 +359,7 @@ String DATAVERSE_CLASS::GetInfoFromDataverse(String url) {
         int server_status = this->mWifi->client.connected();
         this->mserial->printStrln("Server status code: " + String(server_status));
       }
-      this->mWifi->resumeStandbyMode();
+      this->mWifi->resumePowerSavingMode();
       return "";
   }
   
@@ -420,7 +424,7 @@ String DATAVERSE_CLASS::GetInfoFromDataverse(String url) {
   String responseContent = this->mWifi->client.readStringUntil('\n');
   this->mWifi->client.stop();
   
-  this->mWifi->resumeStandbyMode();
+  this->mWifi->resumePowerSavingMode();
   
   return responseContent;
   this->ErrMsgShown = false;
@@ -464,6 +468,10 @@ void DATAVERSE_CLASS::getDatasetMetadata(){
 // *****************************************************
 bool DATAVERSE_CLASS::gbrl_commands(String $BLE_CMD , uint8_t sendTo){
     String dataStr="";
+
+    if($BLE_CMD=="$?"){
+      return this->helpCommands( $BLE_CMD, sendTo );
+    }
 
     if($BLE_CMD=="$dv server"){
         dataStr="Dataverse Server Address is: "+ String(this->config.SERVER_URL) +"\n";
@@ -528,7 +536,7 @@ bool DATAVERSE_CLASS::gbrl_commands(String $BLE_CMD , uint8_t sendTo){
                     "$dv set token                  - Set a new Dataverse API TOKEN\n\n";
 
     this->interface->sendBLEstring( dataStr); 
-    return false;
+    return true; // last one on the list needs to return true
  }
 
 // -------------------------------------------------------------------------------

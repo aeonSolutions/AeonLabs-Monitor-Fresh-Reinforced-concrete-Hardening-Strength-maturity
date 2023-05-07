@@ -40,7 +40,8 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
 #include "ESP32Time.h"
 #include "sha204_i2c.h"
 #include "mserial.h"
-#include "FFat.h"
+#include "FS.h"
+#include <LittleFS.h>
 #include "onboard_led.h"
 #include <ArduinoJson.h>
 #include <HardwareSerial.h>
@@ -90,7 +91,7 @@ class INTERFACE_CLASS {
       bool onboard_motion_sensor_en;
       bool onboard_temperature_en;
       bool onboard_humidity;
-
+      double MOTION_SENSITIVITY;
     // ************* DEBUG *****************
       bool DEBUG_EN; // ON / OFF
       uint8_t DEBUG_TO; // UART, BLE   
@@ -101,10 +102,16 @@ class INTERFACE_CLASS {
 
       String DEVICE_PASSWORD;
       String DEVICE_BLE_NAME;
+
+      String language;
       
     } config_strut;
 
     config_strut config;
+// ...................................................
+  
+  StaticJsonDocument <6000> deviceLangJson;
+  StaticJsonDocument <6000> baseLangJson;
 
    // firmmware update  ***************************
     bool forceFirmwareUpdate;
@@ -131,6 +138,7 @@ class INTERFACE_CLASS {
 
     int8_t SAMPLING_FREQUENCY ; 
 
+    int MAX_FREQUENCY ; 
     int WIFI_FREQUENCY ; // min WIFI MCU Freq is 80-240
     int MIN_MCU_FREQUENCY ;
     int SERIAL_DEFAULT_SPEED;    
@@ -156,7 +164,7 @@ class INTERFACE_CLASS {
     // Geo Location  ******************************
     String InternetIPaddress;
     String requestGeoLocationDateTime;
-    JsonObject geoLocationInfoJson;
+    StaticJsonDocument <512> geoLocationInfoJson;
 
     // Sensors ****************************************
     int8_t NUMBER_OF_SENSORS; 
@@ -182,8 +190,8 @@ class INTERFACE_CLASS {
     void setBLEconnectivityStatus(bool status);
     bool getBLEconnectivityStatus();
 
-    bool loadSettings(fs::FS &fs=FFat );
-    bool saveSettings(fs::FS &fs=FFat );
+    bool loadSettings( fs::FS &fs = LittleFS );
+    bool saveSettings( fs::FS &fs = LittleFS );
 
     void sendBLEstring(String message="",  uint8_t sendTo = mSerial::DEBUG_TO_BLE );
 
@@ -193,6 +201,13 @@ class INTERFACE_CLASS {
     void clear_wifi_networks();
     int getNumberWIFIconfigured();
     void setNumberWIFIconfigured(uint8_t num);
+
+    bool loadDeviceLanguagePack(String country, uint8_t sendTo );
+    bool loadBaseLanguagePack(String country, uint8_t sendTo );
+    bool loadDefaultLanguagePack(uint8_t sendTo = mSerial::DEBUG_BOTH_USB_UART );
+
+    String DeviceTranslation(String key);
+    String BaseTranslation(String key);
 };
 
 #endif

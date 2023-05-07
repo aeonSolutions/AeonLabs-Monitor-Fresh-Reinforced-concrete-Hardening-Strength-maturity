@@ -57,9 +57,9 @@ class FILE_CLASS  {
     bool init( fs::LittleFSFS &fs, String partitionName,  uint8_t maxFiles,  mSerial* mserial, ONBOARD_LED_CLASS* onboardLED);
     void partition_info();
 
-    void storage_list_files(fs::FS  &fs);
-    bool storage_test_write_file(fs::FS  &fs);  
-    bool storage_test_read_file(fs::FS  &fs);
+    void storage_list_files( fs::FS &fs = LittleFS );
+    bool storage_test_write_file( fs::FS &fs = LittleFS );  
+    bool storage_test_read_file( fs::FS &fs = LittleFS );
     void printDirectory(File dir, int numTabs);
 
 };

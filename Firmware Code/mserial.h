@@ -34,7 +34,8 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
 
 #include <Arduino.h>
 #include <semphr.h>
-#include "FFat.h"
+#include "FS.h"
+#include <LittleFS.h>
 #include  "BLECharacteristic.h"
 #include <HardwareSerial.h>
 #include "USB.h"
@@ -67,7 +68,7 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
       static constexpr uint8_t DEBUG_TO_UART = 11;
       static constexpr uint8_t DEBUG_TO_USB = 13;
       static constexpr uint8_t DEBUG_BOTH_USB_UART = 14;
-      static constexpr uint8_t DEBUG_BOTH_USB_UART_BLE = 14;
+      static constexpr uint8_t DEBUG_ALL_USB_UART_BLE = 14;
       static constexpr uint8_t DEBUG_TO_BLE_UART = 12;
 
       bool DEBUG_EN; // ON / OFF

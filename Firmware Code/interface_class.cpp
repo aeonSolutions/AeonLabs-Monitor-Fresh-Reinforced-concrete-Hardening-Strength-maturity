@@ -37,6 +37,8 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
 #include "m_file_functions.h"
 #include "mserial.h"
 #include <WiFiMulti.h>
+#include "lang_base.h"
+#include "lang_scc.h"
 
 INTERFACE_CLASS::INTERFACE_CLASS(){
   this->firmware_version="-.-.-";
@@ -64,11 +66,13 @@ void INTERFACE_CLASS::init( mSerial* mserial, bool DEBUG_ENABLE) {
   this->onBoardLED->LED_BLUE_CH = 2;
   this->onBoardLED->LED_GREEN_CH = 9;
   // ___________ MCU freq ____________________
-  this-> SAMPLING_FREQUENCY = 240; 
-  this-> WIFI_FREQUENCY = 80; // min WIFI MCU Freq is 80-240
-  this->MIN_MCU_FREQUENCY = 10;
-  this-> SERIAL_DEFAULT_SPEED = 115200;
+  this->SAMPLING_FREQUENCY = 80; 
+  this->MAX_FREQUENCY=240;
+  this->WIFI_FREQUENCY = 80; // min WIFI MCU Freq is 80-240
+  this->MIN_MCU_FREQUENCY = 80;
+  this->SERIAL_DEFAULT_SPEED = 115200;
 
+  this->loadDefaultLanguagePack( );
 
   this->mserial->printStrln ("Firmware Build: " + String(__DATE__ ) + " " + String(__TIME__) + " version: " + this->firmware_version + "\n");
   //this->rtc.setTime(1609459200);  // 1st Jan 2021 00:00:00
@@ -104,20 +108,54 @@ void INTERFACE_CLASS::settings_defaults(){
   this->Measurments_NEW=false;
   this->config.SENSOR_DATA_FILENAME="concrete_curing.csv";
   this->config.DEVICE_PASSWORD="";
+  
+  this->config.MOTION_SENSITIVITY = 0.07;
+  this->config.language ="en";
 
   this->LIGHT_SLEEP_EN=false;
   this->BLE_IS_DEVICE_CONNECTED=false;
   this->config.DEVICE_BLE_NAME="Slab 12A";
   this->forceFirmwareUpdate=false;
+  
 
   this->clear_wifi_networks();
   
    this->mserial->printStrln("settings defaults loaded.");
 }
 // ****************************************************
+
+    String INTERFACE_CLASS::DeviceTranslation(String key){
+      if ( this->deviceLangJson.isNull() == false ){
+        if(this->deviceLangJson.containsKey(key)){
+          return String( this->deviceLangJson[key].as<char*>() );
+        }else{
+          return key + " not found"; 
+        }
+      }else{
+        return "JSON is null"; 
+      }
+    }
+// ..................................................
+    String INTERFACE_CLASS::BaseTranslation(String key){
+      if ( this->baseLangJson.isNull() == false ){
+        if(this->baseLangJson.containsKey(key)){
+          return String (this->baseLangJson[key].as<char*>() );
+        }else{
+          return key + " not found"; 
+        }
+      }else{
+        return "JSON is null"; 
+      }
+    }
+
+
+// ****************************************************
+
 void INTERFACE_CLASS::setBLEconnectivityStatus(bool status){
+  this->mserial->printStrln("BLE status is " +String(status));
+
   this->BLE_IS_DEVICE_CONNECTED = status;
-  this->mserial->BLE_IS_DEVICE_CONNECTED= status;
+  this->mserial->BLE_IS_DEVICE_CONNECTED = status;
   if (status == false)
     this->$espunixtimeDeviceDisconnected = millis();
 }
@@ -180,7 +218,7 @@ void INTERFACE_CLASS::sendBLEstring(String message,  uint8_t sendTo ){
       message= "empty message found.\n";
 
 
-  if ( ( sendTo == mSerial::DEBUG_TO_BLE || sendTo == mSerial::DEBUG_BOTH_USB_UART_BLE || sendTo == mSerial::DEBUG_TO_BLE_UART) && this->BLE_IS_DEVICE_CONNECTED==true ){
+  if ( ( sendTo == mSerial::DEBUG_TO_BLE || sendTo == mSerial::DEBUG_ALL_USB_UART_BLE || sendTo == mSerial::DEBUG_TO_BLE_UART) && this->BLE_IS_DEVICE_CONNECTED==true ){
     if (WiFi.status() == WL_CONNECTED){
       WiFi.disconnect(true);
       delay(300);
@@ -201,7 +239,7 @@ bool INTERFACE_CLASS::saveSettings(fs::FS &fs){
   this->config.DEBUG_TYPE = this->mserial->DEBUG_TYPE; // Verbose // Errors 
   this->config.DEBUG_SEND_REPOSITORY = this->mserial->DEBUG_SEND_REPOSITORY ;
   
-    this->mserial->printStrln("Saving the Smart Device settings...");
+  this->mserial->printStrln("Saving the Smart Device settings...");
 
   if (fs.exists("/settings.cfg") )
     fs.remove("/settings.cfg");
@@ -211,9 +249,6 @@ bool INTERFACE_CLASS::saveSettings(fs::FS &fs){
     Serial.println("error creating settings file.");
     return false;
   }
-  Serial.println( String("Start Position =") + String(settingsFile.position() ) );
-
-// auto;  0;0;   0;TheScientist;angelaalmeidasantossilva; ;; ;; ;; ;;    ntp server missing; 1725911728;-572489782;-2033959301;   1;1;1;   1; 11;100;0;    concrete_curing.csv; device pw; ble name;
 
   settingsFile.print( this->config.firmwareUpdate + String(';'));
 
@@ -257,6 +292,10 @@ bool INTERFACE_CLASS::saveSettings(fs::FS &fs){
   settingsFile.print( this->config.DEVICE_PASSWORD + String(';'));
 
   settingsFile.print( this->config.DEVICE_BLE_NAME + String(';'));
+
+  settingsFile.print( String(this->config.MOTION_SENSITIVITY ,3)+ String(';'));
+
+  settingsFile.print( this->config.language + String(';'));
 
   settingsFile.close();
   return true;
@@ -344,12 +383,14 @@ bool INTERFACE_CLASS::loadSettings(fs::FS &fs){
     this->config.DEBUG_SEND_REPOSITORY = *(temp.c_str()) != '0';
 
     this->config.SENSOR_DATA_FILENAME = settingsFile.readStringUntil(';');
-    Serial.print("Loading settings : filename is ");
-    Serial.println(this->config.SENSOR_DATA_FILENAME);
 
     this->config.DEVICE_PASSWORD = settingsFile.readStringUntil(';');
     this->config.DEVICE_BLE_NAME = settingsFile.readStringUntil(';');
 
+    this->config.MOTION_SENSITIVITY = settingsFile.readStringUntil(';').toDouble();
+    
+    this->config.language = settingsFile.readStringUntil(';');
+  
   settingsFile.close();
 
   this->mserial->DEBUG_EN = this->config.DEBUG_EN ; 
@@ -357,5 +398,104 @@ bool INTERFACE_CLASS::loadSettings(fs::FS &fs){
   this->mserial->DEBUG_TYPE = this->config.DEBUG_TYPE; 
   this->mserial->DEBUG_SEND_REPOSITORY = this->config.DEBUG_SEND_REPOSITORY ;
 
+  if (this->config.language == "en"){
+    this->loadDefaultLanguagePack( );
+  }else{
+
+    this->loadBaseLanguagePack( this->config.language,  mSerial::DEBUG_ALL_USB_UART_BLE );
+    this->loadDeviceLanguagePack( this->config.language,  mSerial::DEBUG_ALL_USB_UART_BLE );
+  
+  }
+  return true;
+}
+// *************************************************************
+
+bool INTERFACE_CLASS::loadDefaultLanguagePack(uint8_t sendTo ){
+  String dataStr = "";
+  // Deserialize the JSON document
+  DeserializationError error = deserializeJson(this->baseLangJson, defaultBaseTranslations);
+  if (error){
+      dataStr="(397) Failed loading base language file into memory (" + String(error.f_str()) + "). \n";
+      this->mserial->printStrln(dataStr, mSerial::DEBUG_TYPE_ERRORS, sendTo);
+      return false;
+  }
+
+    // Deserialize the JSON document
+  error = deserializeJson(this->deviceLangJson, default_SCC_translations);
+  if (error){
+      dataStr="(434) Failed loading the device language file into memory (" + String(error.f_str()) + "). \n";
+      this->mserial->printStrln(dataStr, mSerial::DEBUG_TYPE_ERRORS, sendTo);
+      return true;
+  }
+
+  return true;
+}
+
+// ************************************************************
+
+bool INTERFACE_CLASS::loadBaseLanguagePack(String country, uint8_t sendTo ){
+  String dataStr= "";
+  // loading language file for the base code 
+  String filename = "/lang/" + country  +"_sys.lang";
+  if ( false == LittleFS.exists( filename) ) {
+    dataStr="(377) Base language file not found. \n";
+    this->sendBLEstring( dataStr,  sendTo );  
+    return false;
+  }
+
+  File baseLang = LittleFS.open(filename, FILE_READ);
+  if( baseLang == false){
+      dataStr="(384) Failed access to the base language file. \n";
+      this->sendBLEstring( dataStr,  sendTo );  
+      return false;
+  }
+
+  String file_content = baseLang.readString();
+  baseLang.close();
+
+  // Deserialize the JSON document
+  DeserializationError error = deserializeJson(this->baseLangJson, file_content);
+  if (error){
+      dataStr="(397) Failed loading base language file into memory (" + String(error.f_str()) + "). \n";
+      this->sendBLEstring( dataStr,  sendTo );  
+      this->mserial->printStrln("Lang contents: \""+ file_content +"\"", mSerial::DEBUG_TYPE_VERBOSE, mSerial::DEBUG_ALL_USB_UART_BLE);
+
+      return false;
+  }
+
+  return true;
+
+}
+
+// *****************************************************
+
+bool INTERFACE_CLASS::loadDeviceLanguagePack(String country, uint8_t sendTo ){
+  String dataStr= "";
+   // loading language file for the smart device 
+  String filename = "/lang/" + country  +".lang";
+  if ( false == LittleFS.exists( filename) ) {
+    dataStr="(414) device language file not found. \n";
+    this->sendBLEstring( dataStr,  sendTo );  
+    return true;
+  }
+
+  File deviceLang = LittleFS.open(filename, FILE_READ);
+  if( deviceLang == false){
+      dataStr="(421) Failed access to the device language file. \n";
+      this->sendBLEstring( dataStr,  sendTo );  
+      return true;
+  }
+
+  String file_content = deviceLang.readString();
+  deviceLang.close();
+
+  // Deserialize the JSON document
+  DeserializationError error2 = deserializeJson(this->deviceLangJson, file_content);
+  if (error2){
+      dataStr="(434) Failed loading the device language file into memory (" + String(error2.f_str()) + "). \n";
+      this->sendBLEstring( dataStr,  sendTo );  
+      return true;
+  }
+  
   return true;
 }

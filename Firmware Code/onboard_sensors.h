@@ -87,7 +87,7 @@ class ONBOARD_SENSORS {
 
     bool commands(String $BLE_CMD, uint8_t sendTo);
     bool helpCommands(uint8_t sendTo);
-
+    void initRollTheshold();
 };
 
 #endif

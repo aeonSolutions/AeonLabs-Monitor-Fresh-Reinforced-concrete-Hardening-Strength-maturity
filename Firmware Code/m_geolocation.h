@@ -34,7 +34,6 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
 
 #include "interface_class.h"
 #include "mserial.h"
-#include "m_wifi.h"
 
 #ifndef GEO_LOCATION_CLASS_DEF
   #define GEO_LOCATION_CLASS_DEF
@@ -43,7 +42,6 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
       private:
           mSerial*            mserial=nullptr;
           INTERFACE_CLASS*    interface=nullptr;
-          M_WIFI_CLASS*       mWifi;
 
           long int            REQUEST_DELTA_TIME;
           long int            $espunixtimePrev;
@@ -51,7 +49,7 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
           bool ErrMsgShown;
       public:
           GEO_LOCATION_CLASS();
-          void init(INTERFACE_CLASS* interface, M_WIFI_CLASS* mWifi,  mSerial* mserial);
+          void init(INTERFACE_CLASS* interface,  mSerial* mserial);
           
           bool get_ip_address();
           bool get_ip_geo_location_data(String ipAddress="", bool override = false);

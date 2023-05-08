@@ -69,9 +69,11 @@ void DATAVERSE_CLASS::init(INTERFACE_CLASS* interface, M_WIFI_CLASS* mWifi, mSer
 
 bool DATAVERSE_CLASS::saveSettings(fs::FS &fs){
   File settingsFile = fs.open(F("/dataverse.cfg"), "w"); 
-  if (!settingsFile)
+  if (!settingsFile){
+    settingsFile.close();
     return false;
-
+  }
+  
   settingsFile.write((byte *)&this->config, sizeof(this->config));
   settingsFile.close();
   return true;
@@ -79,9 +81,11 @@ bool DATAVERSE_CLASS::saveSettings(fs::FS &fs){
 
 bool DATAVERSE_CLASS::readSettings(fs::FS &fs){
   File settingsFile = fs.open("/dataverse.cfg", FILE_WRITE);
-  if (!settingsFile)
+  if (!settingsFile){
+    settingsFile.close();
     return false;
-
+  }
+  
   settingsFile.read((byte *)&this->config, sizeof(this->config));
   settingsFile.close();
   return true;
@@ -515,7 +519,7 @@ bool DATAVERSE_CLASS::gbrl_commands(String $BLE_CMD , uint8_t sendTo){
         return true;
     }
 
-    return this->helpCommands( $BLE_CMD, sendTo);
+    return false;
 }
 
 // ****************************************************

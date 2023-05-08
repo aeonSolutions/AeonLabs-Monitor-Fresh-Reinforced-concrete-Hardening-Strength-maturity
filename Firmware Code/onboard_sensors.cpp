@@ -46,7 +46,7 @@ ONBOARD_SENSORS::ONBOARD_SENSORS(){
 
 void ONBOARD_SENSORS::init(INTERFACE_CLASS* interface, mSerial* mserial){
     this->mserial=mserial;
-    this->mserial->printStrln("Onboard sensors init...");
+    this->mserial->printStrln("Onboard Sensors:");
     
     this->interface=interface;
     this->i2c_err_t[0]="I2C_ERROR_OK";
@@ -74,8 +74,7 @@ void ONBOARD_SENSORS::init(INTERFACE_CLASS* interface, mSerial* mserial){
     this->numtimesMotionDetected=0;
 
     time(&this->$espunixtimePrev);
-    
-    this->mserial->printStrln("done.\n");
+
 }
 
 // ***************************************************************
@@ -191,7 +190,7 @@ bool ONBOARD_SENSORS::motionShakeDetected(uint8_t numShakes){
 void ONBOARD_SENSORS::initRollTheshold(){
     this->mserial->printStr("Calibration of motion detection.Dont move the device..");
     float X, Y, Z, totalAccel;
-    for (int i=0; i<10; i++) {
+    for (int i=0; i<100; i++) {
       X += this->LSM6DS3_Motion_X;
       Y += this->LSM6DS3_Motion_Y;
       Z += this->LSM6DS3_Motion_Z;
@@ -203,7 +202,7 @@ void ONBOARD_SENSORS::initRollTheshold(){
 
     totalAccel = sqrt(X*X + Y*Y + Z*Z);
     this->ROLL_THRESHOLD = totalAccel * ( 1.0 + this->interface->config.MOTION_SENSITIVITY); 
-    this->mserial->printStrln("Done.");
+    this->mserial->printStrln("Done.\n");
 }
 
 // ************************************************************
@@ -333,6 +332,7 @@ bool ONBOARD_SENSORS::commands(String $BLE_CMD, uint8_t sendTo){
     }
     this->interface->sendBLEstring( dataStr, sendTo); 
     return true; 
+
   }else if($BLE_CMD=="$?" || $BLE_CMD=="$help"){
       return this->helpCommands(sendTo);
   } else if($BLE_CMD=="$ot"){
@@ -357,8 +357,6 @@ bool ONBOARD_SENSORS::commands(String $BLE_CMD, uint8_t sendTo){
     return true; 
   } else if($BLE_CMD=="$om"){
     this->request_onBoard_Sensor_Measurements();
-    Serial.print("MCU temp: ");
-    Serial.println(this->LSM6DS3_TEMP);
     dataStr=String("Current MCU temperature is: ") + String(roundFloat(this->LSM6DS3_TEMP,2))+ String(char(176)) + String("C")  +String(char(10));
     this->interface->sendBLEstring( dataStr, sendTo);  
     return true; 
@@ -377,7 +375,7 @@ bool ONBOARD_SENSORS::commands(String $BLE_CMD, uint8_t sendTo){
       return true;
     }
   }
-  
+
   return false; 
 }
 

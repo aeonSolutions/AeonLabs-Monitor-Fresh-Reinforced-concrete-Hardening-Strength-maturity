@@ -35,12 +35,10 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
 #define uS_TO_S_FACTOR 1000000
 
 
-
-
 //----------------------------------------------------------------------------------------
 // Components Testing  **************************************
 bool SCAN_I2C_BUS = false;
-bool TEST_FINGERPRINT_ID_IC=true;
+bool TEST_FINGERPRINT_ID_IC=false;
 
 //----------------------------------------------------------------------------------
 #include <math.h>
@@ -95,17 +93,14 @@ FILE_CLASS* drive = new FILE_CLASS(mserial);
 
 // OTA updates
 #include <esp32FOTA.hpp>
-esp32FOTA esp32FOTA("esp32-fota-http", "0.0.0", false);
+esp32FOTA* esp32fota;
 
 // WIFI Class
 #include "m_wifi.h"
 M_WIFI_CLASS* mWifi= new M_WIFI_CLASS();
 
-// Geo Location
-#include "m_geolocation.h"
+// Certificates
 #include "github_cert.h"
-GEO_LOCATION_CLASS geoLocation = GEO_LOCATION_CLASS();
-
 /********************************************************************/ 
 
 #include <BLEDevice.h>
@@ -219,12 +214,16 @@ long int prevMeasurementMillis;
 
 void setup() { 
   // Firmware Build Version / revision ______________________________
-  interface->firmware_version="1.0.12";
+  interface->firmware_version="1.0.16";
 
   MemLockSemaphoreBLE_RX = xSemaphoreCreateMutex();
 
   interface->UARTserial = &UARTserial;
   mserial->start(115200);
+  
+  mserial->DEBUG_EN=false;
+  mserial->DEBUG_TYPE = mserial->DEBUG_TYPE_INFO;
+
   interface->init(mserial, true); // debug EN ON
 
   // ......................................................................................................
@@ -267,15 +266,15 @@ void setup() {
   drive->partition_info();
   if (drive->init(LittleFS, "storage", 2, mserial,   interface->onBoardLED ) == false)
     while(1);
-    
+  
+  interface->settings_defaults();
+
   if ( !interface->loadSettings() ){
     interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
     interface->onBoardLED->led[0] = interface->onBoardLED->LED_GREEN;
     interface->onBoardLED->statusLED(100, 2);
   }
-  
-  interface->add_wifi_network("TheScientist","angelaalmeidasantossilva");
-  
+    
   // init onboard sensors
   onBoardSensors->init(interface, mserial);
   onBoardSensors->initRollTheshold();
@@ -345,12 +344,10 @@ void setup() {
 
   // init BLE 
   BLE_init();
-
+  
   //init wifi
   mWifi->init(interface, mserial, interface->onBoardLED);
-  // init Geo Location
-  geoLocation.init(interface, mWifi, mserial);
-  
+
   mWifi->WIFIscanNetworks();
   
   // check for firmwate update
@@ -373,7 +370,7 @@ void setup() {
   interface->$espunixtimeDeviceDisconnected = millis();
 
   prevMeasurementMillis = millis();
-  Serial.println("Free memory: " + addThousandSeparators( std::string( String(esp_get_free_heap_size() ).c_str() ) ) + " bytes\n");
+  mserial->printStrln("Free memory: " + addThousandSeparators( std::string( String(esp_get_free_heap_size() ).c_str() ) ) + " bytes");
   
   mserial->printStrln("\nsetup is completed. You may start using the " + String(DEVICE_NAME) );
   mserial->printStrln("Type $? for a List of commands.\n");
@@ -386,10 +383,16 @@ void setup() {
 String dataStr="";
 long int eTime;
 long int statusTime = millis();
+long int beacon = millis();
 // adc_power_release()
 
 
 void loop() {
+if (millis() - beacon > 10000){
+  beacon = millis();
+  mserial->printStrln("(" + String(beacon) + ") Free memory: " + addThousandSeparators( std::string( String(esp_get_free_heap_size() ).c_str() ) ) + " bytes\n", mSerial::DEBUG_TYPE_VERBOSE, mSerial::DEBUG_ALL_USB_UART_BLE);
+}
+
 // ................................................................................
   if ( onBoardSensors->motionShakeDetected(5) ){
     if ( interface->CURRENT_CLOCK_FREQUENCY < interface->WIFI_FREQUENCY )  {
@@ -439,11 +442,11 @@ void loop() {
 if ( (millis() - statusTime > 10000) && maturity->Measurments_EN == true ){ //10 sec
     statusTime = millis();
     interface->onBoardLED->led[1] = interface->onBoardLED->LED_GREEN;
-    interface->onBoardLED->statusLED(100, 0.05);
+    interface->onBoardLED->statusLED(100, 0.04);
 }else if  (millis() - statusTime > 10000){
     statusTime = millis();
     interface->onBoardLED->led[1] = interface->onBoardLED->LED_RED;
-    interface->onBoardLED->statusLED(100, 0.05);
+    interface->onBoardLED->statusLED(100, 0.04);
 }
 
 // ................................................................................ 
@@ -451,7 +454,7 @@ if ( (millis() - statusTime > 10000) && maturity->Measurments_EN == true ){ //10
   maturity->request_measurment_data();
 
   if (maturity->hasNewMeasurementValues==true ){
-    dataStr = "Current Temperature measurement: " + String(roundFloat(maturity->last_measured_probe_temp,2)) + String(char(176))+String("C");
+    dataStr =  interface->DeviceTranslation("probing_temp") + ": " + String(roundFloat(maturity->last_measured_probe_temp,2)) + String(char(176))+String("C");
     dataStr += String(char(10) + String(char(10)) );
     
     bool sendTo= mSerial::DEBUG_BOTH_USB_UART;
@@ -464,7 +467,6 @@ if ( (millis() - statusTime > 10000) && maturity->Measurments_EN == true ){ //10
   
   // ................................................................................
 
- geoLocation.get_ip_geo_location_data();
  dataverse->UploadToDataverse(interface->getBLEconnectivityStatus());
  // ................................................................................    
 
@@ -497,17 +499,16 @@ void GBRLcommands(String command, uint8_t sendTo){
   if (gbrl.commands(command, sendTo) == false){
     if( onBoardSensors->commands(command, sendTo ) == false){
       if (mWifi->gbrl_commands(command, sendTo ) == false){    
-        if (geoLocation.gbrl_commands(command, sendTo ) == false){    
           if (maturity->gbrl_commands(command, sendTo ) == false){
             if( dataverse->gbrl_commands(command, sendTo ) == false){
-              if ($BLE_CMD.indexOf("$")==-1 || $BLE_CMD.indexOf("$")>0){
+              if (command.indexOf("$")==-1 || command.indexOf("$")>0){
                 interface->sendBLEstring("$ CMD ERROR \r\n", sendTo);
               }else{
-                interface->sendBLEstring("$ CMD UNK \r\n", sendTo);
+                // interface->sendBLEstring("$ CMD UNK \r\n", sendTo);
               }
             }
           }
-        }
+        
       }
     }
   }
@@ -589,19 +590,7 @@ void forceFirmwareUpdate(){
     interface->onBoardLED->statusLED(100, 1);
     return;   
   }
-
-  if ( interface->getBLEconnectivityStatus()){
-    interface->sendBLEstring("requesting internet IP ...");
-    delay(500);
-  }
-  geoLocation.get_ip_address();
-  
-  if ( interface->getBLEconnectivityStatus()){
-    interface->sendBLEstring("done. \nrequesting Geo Location data ...");
-    delay(500);
-  }
-  geoLocation.get_ip_geo_location_data();
-  
+    
   if ( interface->getBLEconnectivityStatus()){
     if ( interface->geoLocationInfoJson.containsKey("country") && interface->geoLocationInfoJson.containsKey("regionName") ){
       mserial->printStrln("done. \n Country:" + String(interface->geoLocationInfoJson["country"].as<char*>()) + "\n Region: " + String(interface->geoLocationInfoJson["regionName"].as<char*>()) + "\n");
@@ -609,23 +598,18 @@ void forceFirmwareUpdate(){
       delay(500);
     }
   }
-  // Local RTC
-  if ( interface->getBLEconnectivityStatus()){
-    interface->sendBLEstring("syncronizing with a Internet Time server...");
-    delay(500);
-  }
-  interface->init_NTP_Time();
-  mWifi->updateInternetTime();
+
   
   if ( interface->getBLEconnectivityStatus()){
     delay(500);
     interface->sendBLEstring("done. \nRequesting the lastest firmware revision....");
     delay(500);
   }
-  
+
+  esp32fota = new esp32FOTA("esp32-fota-http", "0.0.0", false);
   //init OTA updates
   {
-    auto cfg = esp32FOTA.getConfig();
+    auto cfg = esp32fota->getConfig();
     cfg.name          = "esp32-fota-http";
     cfg.manifest_url  = "https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/releases/download/openFirmware/version.json";
     cfg.sem           = SemverClass( interface->firmware_version.substring(0, interface->firmware_version.indexOf(".")).toInt() , interface->firmware_version.substring( interface->firmware_version.indexOf(".")+1, interface->firmware_version.lastIndexOf(".")).toInt(), interface->firmware_version.substring( interface->firmware_version.lastIndexOf(".")+1, interface->firmware_version.length() ).toInt() ); // major, minor, patch
@@ -634,11 +618,11 @@ void forceFirmwareUpdate(){
     cfg.root_ca       = new CryptoMemAsset("Root CA", GITHUB_ROOT_CA_RSA_SHA384, strlen(GITHUB_ROOT_CA_RSA_SHA384)+1 );
     //cfg.pub_key       = MyRSAKey;
     //cfg.use_device_id = false;
-    esp32FOTA.setConfig( cfg );
+    esp32fota->setConfig( cfg );
   }
 
   //esp32FOTA.setManifestURL( manifest_url );
-  bool updatedNeeded = esp32FOTA.execHTTPcheck();
+  bool updatedNeeded = esp32fota->execHTTPcheck();
   if (updatedNeeded) {
     interface->onBoardLED->led[0] = interface->onBoardLED->LED_BLUE;
     interface->onBoardLED->statusLED(100,0); 
@@ -649,7 +633,7 @@ void forceFirmwareUpdate(){
       delay(500);
     }
 
-    esp32FOTA.execOTA();
+    esp32fota->execOTA();
     WiFi.disconnect(true);
     return;
   }else{
@@ -662,6 +646,7 @@ void forceFirmwareUpdate(){
     interface->onBoardLED->led[0] = interface->onBoardLED->LED_GREEN;
     interface->onBoardLED->statusLED(100, 1);   
   }
-
+  delete esp32fota;
+  esp32fota = nullptr;
   WiFi.disconnect(true);
 }

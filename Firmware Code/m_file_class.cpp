@@ -89,7 +89,7 @@ bool FILE_CLASS::init(fs::LittleFSFS &fs, String partitionName, uint8_t maxFiles
 
 // ************************************************************
 void FILE_CLASS::partition_info(){
-    this->mserial->printStrln("Storage Partition list:");
+    this->mserial->printStrln("Storage Partition list:", mSerial::DEBUG_TYPE_VERBOSE, mSerial::DEBUG_ALL_USB_UART_BLE);
     partloop(ESP_PARTITION_TYPE_DATA);
     partloop(ESP_PARTITION_TYPE_APP);
 
@@ -103,7 +103,7 @@ void FILE_CLASS::partloop(esp_partition_type_t part_type) {
      next_partition = esp_partition_get(iterator);
      if (next_partition != NULL) {
       String dataStr = "partition addr: 0x" +String(next_partition->address, HEX) + "    size: " + addThousandSeparators( std::string( String(next_partition->size, DEC).c_str() ) )  + " bytes     label: " + String(next_partition->label) ;  
-      this->mserial->printStrln(dataStr);
+      this->mserial->printStrln(dataStr, mSerial::DEBUG_TYPE_VERBOSE, mSerial::DEBUG_ALL_USB_UART_BLE);
       iterator = esp_partition_next(iterator);
     }
   }

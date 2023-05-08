@@ -39,7 +39,6 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 
-
 #ifndef INTERFACE_CLASS_DEF
   #include "interface_class.h"
 #endif
@@ -58,8 +57,10 @@ class M_WIFI_CLASS {
   private:
     WiFiMulti* wifiMulti;
     long int lastTimeWifiConnectAttempt;
-    static void WiFiEvent(WiFiEvent_t event);
-    bool errMsgShown;
+    long int prevTimeErrMsg;
+    
+    long int            REQUEST_DELTA_TIME_GEOLOCATION;
+    long int            $espunixtimePrev;      
 
    // GBRL commands  *********************************************
     String selected_menu;
@@ -71,6 +72,7 @@ class M_WIFI_CLASS {
     bool wifi_commands(String $BLE_CMD, uint8_t sendTo );
     bool change_device_name(String $BLE_CMD, uint8_t sendTo );
 
+    bool checkErrorMessageTimeLimit();
 
   public:
     int HTTP_TTL; // 20 sec TTL
@@ -80,7 +82,6 @@ class M_WIFI_CLASS {
     INTERFACE_CLASS*    interface=nullptr;
     ONBOARD_LED_CLASS*  onboardLED;
     
-    static WiFiEvent_t       event;
     uint32_t                 connectionTimeout;
     bool              WIFIconnected;
     uint8_t number_WIFI_networks;
@@ -98,20 +99,23 @@ bool start(uint32_t  connectionTimeout, uint8_t numberAttempts);
 bool connect2WIFInetowrk(uint8_t numberAttempts);
 
 String get_wifi_status(int status);
-void WIFIscanNetworks();
+void WIFIscanNetworks(bool override = false);
 
-void WIFIevents();
 void updateInternetTime();
 void resumePowerSavingMode();
 void resumeWifiMode();
 
 bool downloadFileHttpGet(String filename, String httpAddr, uint8_t sendTo);
+bool get_ip_geo_location_data(String ipAddress = "" , bool override = false);
+
+bool get_ip_address();
 
    // GBRL commands  *********************************************
 bool gbrl_commands(String $BLE_CMD, uint8_t sendTo );
 
 };
 
-
+void WIFIevent(WiFiEvent_t event);
+void WiFiGotIP(WiFiEvent_t event, WiFiEventInfo_t info);
 
 #endif

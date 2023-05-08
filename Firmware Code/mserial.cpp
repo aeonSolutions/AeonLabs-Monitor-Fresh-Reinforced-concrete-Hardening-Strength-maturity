@@ -72,7 +72,7 @@ void mSerial::start(int baud) {
 
 // ---------------------------------------------------------
 void mSerial::printStrln(String str, uint8_t debugType, uint8_t DEBUG_TO ) {
-  this->log(str + String( char(10) ), DEBUG_TO, debugType );
+  this->log(str + String( char(10) ), debugType, DEBUG_TO );
 }
 
 // ----------------------------------------------------
@@ -82,9 +82,11 @@ void mSerial::printStr(String str, uint8_t debugType, uint8_t DEBUG_TO ) {
 
 // ----------------------------------------------------------
   void mSerial::log( String str, uint8_t debugType, uint8_t DEBUG_TO ){
-    //String mem = "RAM: " + addThousandSeparators( std::string( String(esp_get_free_heap_size() ).c_str() ) )  + " b >> ";
+    // String mem = "RAM: " + addThousandSeparators( std::string( String(esp_get_free_heap_size() ).c_str() ) )  + " b >> ";
     String mem ="";
-    if (this->DEBUG_EN && ( this->DEBUG_TYPE == debugType || this->DEBUG_TYPE == this->DEBUG_TYPE_VERBOSE ) ) {
+    
+    if ( (this->DEBUG_EN && ( this->DEBUG_TYPE == debugType || this->DEBUG_TYPE == this->DEBUG_TYPE_VERBOSE ) ) || debugType == this->DEBUG_TYPE_INFO ) {
+
       if ( ( this->DEBUG_TO == this->DEBUG_TO_BLE || this->DEBUG_TO == this->DEBUG_TO_BLE_UART )  ){
           if (this->BLE_IS_DEVICE_CONNECTED)
             this->sendBLEstring(str + String( char(10) ) );
@@ -98,7 +100,7 @@ void mSerial::printStr(String str, uint8_t debugType, uint8_t DEBUG_TO ) {
         xSemaphoreGive(MemLockSemaphoreSerial); // exit critical section    
       }
       
-      if ( this->DEBUG_TO == this->DEBUG_TO_USB || this->DEBUG_TO == this->DEBUG_TO_BLE_UART  || this->DEBUG_TO == this->DEBUG_BOTH_USB_UART ){ // debug to USB
+      if ( this->DEBUG_TO == this->DEBUG_TO_USB || this->DEBUG_TO == this->DEBUG_TO_BLE_USB  || this->DEBUG_TO == this->DEBUG_BOTH_USB_UART ){ // debug to USB
         xSemaphoreTake(MemLockSemaphoreUSBSerial, portMAX_DELAY); // enter critical section
           Serial.print(mem);
           Serial.print(str);
@@ -121,7 +123,7 @@ bool mSerial::readSerialData(){
       char inChar = Serial.read();
       this->serialDataReceived += String(inChar);
     }
-    Serial.print("R: ");
+    this->printStr(">");
     return true;
   }else{
     return false;
@@ -139,6 +141,7 @@ bool mSerial::readUARTserialData(){
       char inChar = UARTserial->read();
       this->serialUartDataReceived += String(inChar);
     }
+    this->printStr(">");
     return true;
   }else{
     return false;

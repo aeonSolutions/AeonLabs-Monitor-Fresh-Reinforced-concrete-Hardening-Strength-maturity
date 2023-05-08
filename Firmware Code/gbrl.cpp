@@ -58,7 +58,7 @@ void GBRL::init(INTERFACE_CLASS* interface, MATURITY_CLASS* maturity, mSerial* m
                     "$help $?                           - View available GBRL commands\n" \
                     "$dt                                - Device Time\n" \
                     "$ver                               - Device Firmware Version\n" \
-                    "$uid                               - This Smart Device Unique Serial Number\n" 
+                    "$did                               - This Smart Device Unique Serial Number\n" 
                     "$sleep [on/off]                    - Enable/disable device sleep (save battery power)\n" 
                     "$sleep status                      - View current device sleep status\n" 
                     "\n" \
@@ -89,6 +89,13 @@ bool GBRL::commands(String $BLE_CMD, uint8_t sendTo ){
     return this->set_device_language($BLE_CMD, sendTo);
   }
 
+  // ToDo
+  if($BLE_CMD.indexOf("$lang set ")>-1){
+    dataStr = "command under development. Update to the Next revision of the firmware.";
+    this->interface->sendBLEstring( dataStr,  sendTo ); 
+    return true;
+  }
+
   if($BLE_CMD.indexOf("$sleep ")>-1){
     if($BLE_CMD == "$sleep status" ){
         if ( this->interface->LIGHT_SLEEP_EN == true){
@@ -116,7 +123,7 @@ bool GBRL::commands(String $BLE_CMD, uint8_t sendTo ){
     }
   }
 
-  if($BLE_CMD == "$uid"){
+  if($BLE_CMD == "$did"){
     dataStr = "This Smart Device Serial Number is : ";
     dataStr += CryptoICserialNumber(this->interface) + "\n";
     this->interface->sendBLEstring( dataStr,  sendTo ); 
@@ -129,7 +136,6 @@ bool GBRL::commands(String $BLE_CMD, uint8_t sendTo ){
       return this->powerManagement($BLE_CMD,  sendTo );
   }else if($BLE_CMD=="$settings reset"){
       if (LittleFS.exists("/settings.cfg") ){
-        Serial.println("file exists");
         if(LittleFS.remove("/settings.cfg") > 0 ){
           this->mserial->printStrln("old settings file deleted");          
         }else{

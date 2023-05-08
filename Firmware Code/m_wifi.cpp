@@ -45,7 +45,6 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
 M_WIFI_CLASS::M_WIFI_CLASS(){
   this->MemLockSemaphoreWIFI = xSemaphoreCreateMutex();
   this->WIFIconnected=false;
-  this->errMsgShown = false;
 }
 
 
@@ -55,28 +54,36 @@ void M_WIFI_CLASS::init(INTERFACE_CLASS* interface, mSerial* mserial, ONBOARD_LE
     this->mserial->printStr("init wifi ...");
     this->interface=interface;
     this->onboardLED=onboardLED;
+    
+    this->REQUEST_DELTA_TIME_GEOLOCATION  = 10*60*1000; // 10 min 
+    this->$espunixtimePrev= millis(); 
+    
     this->HTTP_TTL= 20000; // 20 sec TTL
     this->lastTimeWifiConnectAttempt=millis();
     this->wifiMulti= new WiFiMulti();
-
+    this->prevTimeErrMsg = millis() - 60000;
+    WiFi.onEvent(WIFIevent);
+    WiFi.onEvent(WiFiGotIP, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
     this->mserial->printStrln("done");
 }
 
 // ************************************************
 
 bool M_WIFI_CLASS::start(uint32_t  connectionTimeout, uint8_t numberAttempts){
+
+    if (WiFi.status() == WL_CONNECTED)
+      return true;
+
     this->connectionTimeout=connectionTimeout;
     
     if (interface->getNumberWIFIconfigured() == 0 ){
       this->lastTimeWifiConnectAttempt=millis();
-      if ( this->errMsgShown == false ){
+      if ( this->checkErrorMessageTimeLimit() ){
         this->mserial->printStrln("WIFI: You need to add a wifi network first", this->mserial->DEBUG_TYPE_ERRORS);
-        this->errMsgShown = true;
       }
       return false;
     }
-  
-    this->errMsgShown = false;
+
     
     if ( this->interface->CURRENT_CLOCK_FREQUENCY < this->interface->WIFI_FREQUENCY )
       this->resumeWifiMode();
@@ -92,7 +99,15 @@ bool M_WIFI_CLASS::start(uint32_t  connectionTimeout, uint8_t numberAttempts){
     this->lastTimeWifiConnectAttempt=millis();
     return true;
 }
+// ********************************************
 
+bool M_WIFI_CLASS::checkErrorMessageTimeLimit(){
+  if( millis() - this-> prevTimeErrMsg > 60000 ){
+    this-> prevTimeErrMsg = millis();
+    return false;
+  }
+    return true;
+}
 
 // **************************************************
 
@@ -101,18 +116,15 @@ bool M_WIFI_CLASS::connect2WIFInetowrk(uint8_t numberAttempts){
     return true;
   
   if (this->interface->getNumberWIFIconfigured() == 0 ){
-    if ( this->errMsgShown == false ){
+    if ( this->checkErrorMessageTimeLimit() ){
       this->mserial->printStrln("C2W: You need to add a wifi network first", this->mserial->DEBUG_TYPE_ERRORS);
-      this->errMsgShown = true;
     }
     this->lastTimeWifiConnectAttempt=millis();
     return false;
   }
   
-  this->errMsgShown = false;
   //WiFi.disconnect(true);
-  //WiFi.onEvent(M_WIFI_CLASS::WiFiEvent);
-  
+ 
   int WiFi_prev_state=-10;
   int cnt = 0;        
   uint8_t statusWIFI=WL_DISCONNECTED;
@@ -121,18 +133,25 @@ bool M_WIFI_CLASS::connect2WIFInetowrk(uint8_t numberAttempts){
   while (statusWIFI != WL_CONNECTED) {
     // Connect to Wi-Fi using wifiMulti (connects to the SSID with strongest connection)
     this->mserial->printStr( "# " );
-    if(this->wifiMulti->run(this->connectionTimeout) == WL_CONNECTED) {
-        statusWIFI = WiFi.waitForConnectResult();
-        this->mserial->printStrln("\nWiFi connected ("+ get_wifi_status(statusWIFI) +")");
-        this->mserial->printStrln("IP address: " + String(WiFi.localIP().toString() ) );
-        this->mserial->printStrln( String( WiFi.SSID() ) + " (" + String( WiFi.RSSI() ) + ")" );
-        
-        this->WIFIconnected=true;
-        return true;
+    if(this->wifiMulti->run(this->connectionTimeout) == WL_CONNECTED) {        
+      this->mserial->printStrln( "Connection Details");
+      this->mserial->printStrln( "   Network : " + String( WiFi.SSID() ) + " (" + String( WiFi.RSSI() ) + ")" );
+      this->mserial->printStrln( "        IP : "+WiFi.localIP().toString());
+      this->mserial->printStrln( "   Gateway : "+WiFi.gatewayIP().toString());
+
+      if(!Ping.ping("www.google.com", 3)){
+        this->mserial->printStrln( "no Internet connectivity found.");
+      }else{
+        //init time
+        configTime(this->interface->config.gmtOffset_sec, this->interface->config.daylightOffset_sec, this->interface->config.ntpServer.c_str());
+        this->updateInternetTime();
+        this->get_ip_geo_location_data();
+      }
+      return true;
     }
     
     cnt++;
-    if (cnt == numberAttempts){
+    if (cnt == numberAttempts &&   this->checkErrorMessageTimeLimit() ){ //1 min
         this->mserial->printStr( "." );
         this->mserial->printStrln("\nCould not connect to a WIFI network after " + String(numberAttempts) + " attempts\n");
         this->WIFIconnected=false;
@@ -186,38 +205,35 @@ String M_WIFI_CLASS::get_wifi_status(int status){
 }
 
 // *********************************************************
-void M_WIFI_CLASS::WIFIscanNetworks(){
-  if (WiFi.status() == WL_CONNECTED)
+void M_WIFI_CLASS::WIFIscanNetworks(bool override){
+  if ( WiFi.status() == WL_CONNECTED && override == false )
     return;
     
-
+  String dataStr = "";
   int n = WiFi.scanNetworks();
   if (n == 0) {
-    this->mserial->printStrln("no WIFI networks found\n");
+    this->interface->sendBLEstring( "no nearby WIFI networks found\n", mSerial::DEBUG_ALL_USB_UART_BLE);
   } else {
-   this-> mserial->printStr("\n" + String(n));
-    this->mserial->printStrln(" WiFi Networks found:");
+    dataStr = "\n" + String(n) + " WiFi networks nearby:\n";
+    this->interface->sendBLEstring(dataStr , mSerial::DEBUG_ALL_USB_UART_BLE);
     for (int i = 0; i < n; ++i) {
       // Print SSID and RSSI for each network found
-      this->mserial->printStr(String(i + 1));
-      this->mserial->printStr(": ");
-      this->mserial->printStr(String(WiFi.SSID(i)));
-      this->mserial->printStr(" (");
-      this->mserial->printStr(String(WiFi.RSSI(i)));
-      this->mserial->printStr(")");
-      this->mserial->printStrln((WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " " : "*");
+      dataStr = String(i + 1) + ": " + String(WiFi.SSID(i)) + " (" + String(WiFi.RSSI(i)) + ")";
+      dataStr += (WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " \n" : "*\n";
+      this->interface->sendBLEstring(dataStr, mSerial::DEBUG_ALL_USB_UART_BLE);
       delay(10);
     }
   }  
 }
 
 // *************************************************************
-void M_WIFI_CLASS::WiFiEvent(WiFiEvent_t event) {  
-  M_WIFI_CLASS::event=event;
+void WiFiGotIP(WiFiEvent_t event, WiFiEventInfo_t info)
+{
+
 }
 
-void M_WIFI_CLASS::WIFIevents(){
-  switch (this->event) {
+void WIFIevent(WiFiEvent_t event){
+  switch (event) {
     case SYSTEM_EVENT_WIFI_READY: 
       Serial.println("WiFi interface ready");
       break;
@@ -234,33 +250,14 @@ void M_WIFI_CLASS::WIFIevents(){
       Serial.println("Connected to access point");
       break;
     case SYSTEM_EVENT_STA_DISCONNECTED:
-      xSemaphoreTake(this->MemLockSemaphoreWIFI, portMAX_DELAY); // enter critical section
-          this->WIFIconnected=false;
-      xSemaphoreGive(this->MemLockSemaphoreWIFI); // exit critical section
-      this->mserial->printStrln("Disconnected from WiFi access point");
+      Serial.println("Disconnected from WiFi access point");
       //WiFi.begin(ssid, password);
       break;
     case SYSTEM_EVENT_STA_AUTHMODE_CHANGE:
       Serial.println("Authentication mode of access point has changed");
       break;
     case SYSTEM_EVENT_STA_GOT_IP:
-      Serial.println("Connection Details");
-      Serial.println("     IP     : "+WiFi.localIP().toString());
-      Serial.println("     Gateway: "+WiFi.gatewayIP().toString());
-
-      if(!Ping.ping("www.google.com", 3)){
-       Serial.println("no Internet connectivity found.");
-      }else{
-        Serial.println("Connection has Internet connectivity.");
-        //init time
-      configTime(this->interface->config.gmtOffset_sec, this->interface->config.daylightOffset_sec, this->interface->config.ntpServer.c_str());
-        this->updateInternetTime();
-      }
-
-      xSemaphoreTake(this->MemLockSemaphoreWIFI, portMAX_DELAY); // enter critical section
-        this->WIFIconnected=true;
-      xSemaphoreGive(this->MemLockSemaphoreWIFI); // exit critical section  
-      delay(200);
+      Serial.println("Connection has Internet connectivity.");
       break;
     case SYSTEM_EVENT_STA_LOST_IP:
       Serial.println("Lost IP address and IP address is reset to 0");
@@ -363,23 +360,18 @@ bool M_WIFI_CLASS::downloadFileHttpGet(String filename, String httpAddr, uint8_t
   }
   
   if (WiFi.status() != WL_CONNECTED ){
-    if (this->errMsgShown == false){
-      this->errMsgShown = true;
+
       this->mserial->printStrln("WIFI DW GET: unable to connect to WIFI.");
       this->interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
       this->interface->onBoardLED->statusLED(100, 1);
-    }
     return false;
   }
   
   File DW_File = LittleFS.open(filename, FILE_WRITE);
   if ( !DW_File ){
-    if (this->errMsgShown == false){
-      this->errMsgShown = true;
       this->mserial->printStrln("WIFI DW GET: error creating  file");
       this->interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
       this->interface->onBoardLED->statusLED(100, 1);
-    }
     return false;
   }
     HTTPClient http;
@@ -432,6 +424,119 @@ bool M_WIFI_CLASS::downloadFileHttpGet(String filename, String httpAddr, uint8_t
   return true;
 
 }
+// ****************************************************************
+// *************************************************************************
+bool M_WIFI_CLASS::get_ip_address(){
+  if(WiFi.status() != WL_CONNECTED)
+    return false;
+
+  HTTPClient http;
+
+  String serverPath = "http://api.ipify.org";
+  this->mserial->printStr("request external IP address...");
+  http.begin(serverPath.c_str());      
+  // Send HTTP GET request
+  int httpResponseCode = http.GET();
+  if (httpResponseCode>0) {
+    this->mserial->printStrln("done (" + String(httpResponseCode) + ")." );
+    if (httpResponseCode == 200){
+      this->interface->InternetIPaddress = http.getString();
+      http.end();
+      return true;
+    }else{
+      this->mserial->printStrln("Error retrieving External IP address");
+    }
+  }else {
+    this->mserial->printStrln("response code error: " + String(httpResponseCode) );
+  }
+  // Free resources
+  http.end();
+  return false;
+}
+
+// *************************************************************************
+bool M_WIFI_CLASS::get_ip_geo_location_data(String ipAddress , bool override ){
+
+  if ( override==false){
+    if ( ( millis() - this->$espunixtimePrev) < this->REQUEST_DELTA_TIME_GEOLOCATION )
+      return false;
+  }
+
+  if (WiFi.status() != WL_CONNECTED ){
+    this->mserial->printStrln("GEO Location: unable to connect to WIFI.");
+    this->interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
+    this->interface->onBoardLED->statusLED(100, 1);
+    return false;
+  }
+
+  this->$espunixtimePrev= millis();
+  
+  HTTPClient http;
+  String serverPath = "http://ip-api.com/json/";
+  if (ipAddress==""){
+    if (this->interface->InternetIPaddress==""){
+      if ( false == this->get_ip_address() )
+        return false;
+    }
+    serverPath += this->interface->InternetIPaddress;
+  }else{
+      serverPath += ipAddress;
+  }
+
+  this->mserial->printStrln( "Requesting Geo Location data... one moment." ); 
+  
+  http.begin(serverPath.c_str());      
+  // Send HTTP GET request
+  int httpResponseCode = http.GET();
+      
+  if (httpResponseCode<1 && httpResponseCode != 200 ) {
+      this->mserial->printStrln("Http error " + String(httpResponseCode) );
+    return false;
+  }
+  
+  String JSONpayload = http.getString();
+     
+  // Parse JSON object
+        /*
+      {
+          "status":"success",
+          "country":"Belgium",
+          "countryCode":"BE",
+          "region":"BRU",
+          "regionName":"Brussels Capital",
+          "city":"Brussels",
+          "zip":"1000",
+          "lat":50.8534,
+          "lon":4.347,
+          "timezone":"Europe/Brussels",
+          "isp":"PROXIMUS",
+          "org":"",
+          "as":"AS5432 Proximus NV",
+          "query":"37.62.11.2"
+      }
+      String stat = this->datasetInfoJson["status"];
+      */
+
+  DeserializationError error = deserializeJson(this->interface->geoLocationInfoJson, JSONpayload);
+  if (error) {
+      this->mserial->printStrln("Error deserializing JSON");
+      
+      interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
+      interface->onBoardLED->statusLED(100, 1);
+      return false;
+  }else{
+    this->interface->requestGeoLocationDateTime= String( this->interface->rtc.getDateTime(true) );
+  }
+  // Free resources
+  http.end();
+
+  interface->onBoardLED->led[0] = interface->onBoardLED->LED_GREEN;
+  interface->onBoardLED->statusLED(100, 1);
+  return true;
+}
+
+
+
 
    // GBRL commands  *********************************************
    // ***********************************************************
@@ -439,7 +544,7 @@ bool M_WIFI_CLASS::gbrl_commands(String $BLE_CMD, uint8_t sendTo ){
   String dataStr="";
 
   if($BLE_CMD=="$?" || $BLE_CMD=="$help"){
-      return  this->helpCommands( sendTo );
+    return  this->helpCommands( sendTo );
   }else if($BLE_CMD=="$view dn" ){
     dataStr =  "The devie BLE name is " + this->interface->config.DEVICE_BLE_NAME + "\n";
     this->interface->sendBLEstring(dataStr,  sendTo ); 
@@ -447,9 +552,50 @@ bool M_WIFI_CLASS::gbrl_commands(String $BLE_CMD, uint8_t sendTo ){
     
   }else if($BLE_CMD.indexOf("$set dn ")>-1){
       return this->change_device_name($BLE_CMD,   sendTo );
+  
+  }else if($BLE_CMD.indexOf("$wifi ")>-1 || this->selected_menu=="$wifi pwd" || this->selected_menu=="$wifi ssid"){
+    return this->wifi_commands( $BLE_CMD,   sendTo );
   }
 
-  return this->wifi_commands( $BLE_CMD,   sendTo );
+  if($BLE_CMD=="$geo info"){
+    this->start(10000,5);
+    if ( false == this->get_ip_geo_location_data( "", true ) ){
+      return true;
+    }
+
+    dataStr="GeoLocation Data:\n";
+    dataStr += "Internet I.P. address: " + this->interface->InternetIPaddress + "\n";
+    dataStr += "Time of last request: " + this->interface->requestGeoLocationDateTime + "\n";
+    
+    if ( this->interface->geoLocationInfoJson.isNull() == true ){
+      dataStr="NULL geoLocation data.\n";
+      this->interface->sendBLEstring( dataStr,  sendTo ); 
+      return true;
+    }
+
+    if(this->interface->geoLocationInfoJson.containsKey("lat")){
+      float lat = this->interface->geoLocationInfoJson["lat"];
+      dataStr += "Latitude: "+ String(lat,4) + "\n";
+    }
+    if(this->interface->geoLocationInfoJson.containsKey("lon")){
+      float lon = this->interface->geoLocationInfoJson["lon"];
+      dataStr += "Longitude: "+ String(lon,4) + "\n";
+    }
+
+    if(this->interface->geoLocationInfoJson.containsKey("regionName"))
+      dataStr += String(this->interface->geoLocationInfoJson["regionName"].as<char*>()) + ", ";       
+    
+    if(this->interface->geoLocationInfoJson.containsKey("country"))
+      dataStr += String(this->interface->geoLocationInfoJson["country"].as<char*>()); 
+    
+    if(this->interface->geoLocationInfoJson.containsKey("countryCode"))
+      dataStr += "(" + String(this->interface->geoLocationInfoJson["countryCode"].as<char*>()) + ")\n\n"; 
+
+    this->interface->sendBLEstring( dataStr,  sendTo ); 
+    return true;
+  }
+  
+  return false;
 }
 
 // *********************************************************
@@ -460,10 +606,13 @@ bool M_WIFI_CLASS::gbrl_commands(String $BLE_CMD, uint8_t sendTo ){
                     "$view dn                           - View device BLE name\n" \
                     "\n" \
                     "$wifi status                       - View WIFI status\n" \
+                    "$wifi nearby                       - View WIFI networks nearby\n" \
                     "$wifi networks                     - View configured WIFI networks\n" \
                     "$wifi ssid                         - Add WIFI network\n" \
                     "$wifi clear                        - Clear all WIFI credentials\n" \
-                    "$wifi default                      - Enable \"SCC WIFI\" default SSID Network\n\n";
+                    "$wifi default                      - Enable \"SCC WIFI\" default SSID Network\n" \
+                    "\n" \
+                    "$geo info                          - View Geo-location data information (requires a WIFI connection)\n\n";
 
     this->interface->sendBLEstring( dataStr,  sendTo ); 
     
@@ -473,7 +622,6 @@ bool M_WIFI_CLASS::gbrl_commands(String $BLE_CMD, uint8_t sendTo ){
  // *********************************************************
 bool M_WIFI_CLASS::wifi_commands(String $BLE_CMD, uint8_t sendTo ){
   String dataStr="";
-  
   
   if($BLE_CMD=="$wifi default"){
     this->interface->clear_wifi_networks();
@@ -485,7 +633,12 @@ bool M_WIFI_CLASS::wifi_commands(String $BLE_CMD, uint8_t sendTo ){
     this->interface->sendBLEstring( dataStr,  sendTo ); 
     return true;
   }  
-  
+
+  if($BLE_CMD=="$wifi nearby"){
+      this->start(10000,5);
+      return true;
+  }
+
   if($BLE_CMD=="$wifi status"){
       dataStr= "Current WIFI status:" + String( char(10));
       dataStr += "     IP     : " + WiFi.localIP().toString() + "\n";
@@ -513,16 +666,11 @@ bool M_WIFI_CLASS::wifi_commands(String $BLE_CMD, uint8_t sendTo ){
       pwd = $BLE_CMD;
       mask = "**********";
     }
-    this->interface->add_wifi_network(  ssid, pwd );
-    
-    this->interface->sendBLEstring( "smart save settings\n",  sendTo ); 
-    
-    this->interface->saveSettings();
-    
-    this->interface->sendBLEstring("end save settings\n",  sendTo ); 
-    
+    if ( this->interface->add_wifi_network(  ssid, pwd ) == false ){
+      return true;
+    }
+        
     dataStr= mask + "\n";
-
   }
 
   if (this->selected_menu=="wifi pwd completed" || $BLE_CMD=="$wifi networks"){

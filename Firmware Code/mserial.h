@@ -62,19 +62,24 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
       // ************* DEBUG *****************
       static constexpr uint8_t DEBUG_TYPE_VERBOSE = 100 ;
       static constexpr uint8_t DEBUG_TYPE_ERRORS = 101;
+      static constexpr uint8_t DEBUG_TYPE_INFO = 102;
 
       static constexpr uint8_t DEBUG_NONE = -1;
+
       static constexpr uint8_t DEBUG_TO_BLE = 10;
+      static constexpr uint8_t DEBUG_TO_BLE_UART = 12;
+      static constexpr uint8_t DEBUG_TO_BLE_USB = 15;
+
       static constexpr uint8_t DEBUG_TO_UART = 11;
       static constexpr uint8_t DEBUG_TO_USB = 13;
       static constexpr uint8_t DEBUG_BOTH_USB_UART = 14;
       static constexpr uint8_t DEBUG_ALL_USB_UART_BLE = 14;
-      static constexpr uint8_t DEBUG_TO_BLE_UART = 12;
 
       bool DEBUG_EN; // ON / OFF
       uint8_t DEBUG_TO; // UART, BLE, USB   
       uint8_t DEBUG_TYPE; // Verbose // Errors 
       bool DEBUG_SEND_REPOSITORY; // YES/ NO
+      
       String LogFilename;
       String serialDataReceived;
       String serialUartDataReceived;
@@ -90,8 +95,8 @@ https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutio
       mSerial(bool DebugMode, HardwareSerial* UARTserial);
       void start(int baud);
 
-      void printStrln( String str,   uint8_t debugType = mSerial::DEBUG_TYPE_VERBOSE , uint8_t DEBUG_TO = mSerial::DEBUG_BOTH_USB_UART ); // default DEBUG_TYPE_VERBOSE
-      void printStr( String str,  uint8_t debugType = mSerial::DEBUG_TYPE_VERBOSE, uint8_t DEBUG_TO = mSerial::DEBUG_BOTH_USB_UART  );
+      void printStrln( String str,   uint8_t debugType = mSerial::DEBUG_TYPE_INFO , uint8_t DEBUG_TO = mSerial::DEBUG_BOTH_USB_UART ); // default DEBUG_TYPE_VERBOSE
+      void printStr( String str,  uint8_t debugType = mSerial::DEBUG_TYPE_INFO, uint8_t DEBUG_TO = mSerial::DEBUG_BOTH_USB_UART  );
       
       void sendBLEstring(String message, uint8_t sendTo = mSerial::DEBUG_TO_BLE);
       bool readSerialData();

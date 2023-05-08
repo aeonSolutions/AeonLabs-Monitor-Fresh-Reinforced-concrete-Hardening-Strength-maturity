@@ -48,7 +48,6 @@ void INTERFACE_CLASS::init( mSerial* mserial, bool DEBUG_ENABLE) {
   this->mserial=mserial;
   this->mserial->DEBUG_EN=DEBUG_ENABLE;
   this->onBoardLED = new ONBOARD_LED_CLASS();
-  this->settings_defaults();
 
   // I2C IOs  __________________________
   this->I2C_SDA_IO_PIN = 8;
@@ -69,7 +68,7 @@ void INTERFACE_CLASS::init( mSerial* mserial, bool DEBUG_ENABLE) {
   this->SAMPLING_FREQUENCY = 80; 
   this->MAX_FREQUENCY=240;
   this->WIFI_FREQUENCY = 80; // min WIFI MCU Freq is 80-240
-  this->MIN_MCU_FREQUENCY = 80;
+  this->MIN_MCU_FREQUENCY = 40;
   this->SERIAL_DEFAULT_SPEED = 115200;
 
   this->loadDefaultLanguagePack( );
@@ -171,16 +170,27 @@ void INTERFACE_CLASS::clear_wifi_networks(){
     this->config.password[i] = "";
   }
   this->number_WIFI_networks=0;
+  this->saveSettings();
 }
 
 // ****************************************************
-void INTERFACE_CLASS::add_wifi_network(String  ssid, String password){
+bool INTERFACE_CLASS::add_wifi_network(String  ssid, String password){
+  for(int i=0; i<5 ; i++){
+    if (this->config.ssid[i] == ssid){
+      this->mserial->printStrln("WIFI network already on the list");
+      return false;
+    }
+  }
 
-    this->config.ssid[this->number_WIFI_networks]=ssid;
-    this->config.password[ this->number_WIFI_networks]= password;
-    this->number_WIFI_networks++;
-    if( this->number_WIFI_networks>4)
-      this->number_WIFI_networks=0;
+  this->config.ssid[this->number_WIFI_networks]=ssid;
+  this->config.password[ this->number_WIFI_networks]= password;
+  this->number_WIFI_networks++;
+
+  if( this->number_WIFI_networks>4)
+    this->number_WIFI_networks=0;
+    
+  this->saveSettings();
+  return true;
 }
 
 // ***************************************************
@@ -210,25 +220,18 @@ void INTERFACE_CLASS::init_NTP_Time(char* ntpServer_, long gmtOffset_sec_, int d
 }
 
 // ***************************************************************************
-void INTERFACE_CLASS::sendBLEstring(String message,  uint8_t sendTo ){
-  if (sendTo == mSerial::DEBUG_NONE )
-    return;
-  
+void INTERFACE_CLASS::sendBLEstring(String message,  uint8_t sendTo ){  
   if( message == "")
       message= "empty message found.\n";
 
 
-  if ( ( sendTo == mSerial::DEBUG_TO_BLE || sendTo == mSerial::DEBUG_ALL_USB_UART_BLE || sendTo == mSerial::DEBUG_TO_BLE_UART) && this->BLE_IS_DEVICE_CONNECTED==true ){
+  if ( sendTo == mSerial::DEBUG_TO_BLE || sendTo == mSerial::DEBUG_ALL_USB_UART_BLE || sendTo == mSerial::DEBUG_TO_BLE_UART ){
     if (WiFi.status() == WL_CONNECTED){
       WiFi.disconnect(true);
-      delay(300);
+      delay(100);
     }
-    this->mserial->sendBLEstring(message, sendTo);
   }
-
-  if ( sendTo != mSerial::DEBUG_NONE && sendTo != mSerial::DEBUG_TO_BLE ){
-    this->mserial->printStr(message, sendTo);
-  }
+  this->mserial->printStr(message, mSerial::DEBUG_TYPE_INFO, sendTo);
 }
 
 // --------------------------------------------------------------------------
@@ -247,6 +250,7 @@ bool INTERFACE_CLASS::saveSettings(fs::FS &fs){
   File settingsFile = fs.open("/settings.cfg", FILE_WRITE); 
   if ( !settingsFile ){
     Serial.println("error creating settings file.");
+    settingsFile.close();
     return false;
   }
 
@@ -308,10 +312,12 @@ bool INTERFACE_CLASS::loadSettings(fs::FS &fs){
   File settingsFile = fs.open("/settings.cfg", FILE_READ);
   if (!settingsFile){
     this->mserial->printStrln("not found.");
+    settingsFile.close();
     return false;
   }
   if (settingsFile.size() == 0){
     this->mserial->printStrln("Invalid file");
+    settingsFile.close();
     return false;    
   }
 

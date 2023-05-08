@@ -193,11 +193,11 @@ class INTERFACE_CLASS {
     bool loadSettings( fs::FS &fs = LittleFS );
     bool saveSettings( fs::FS &fs = LittleFS );
 
-    void sendBLEstring(String message="",  uint8_t sendTo = mSerial::DEBUG_TO_BLE );
+    void sendBLEstring(String message="",  uint8_t sendTo = mSerial::DEBUG_ALL_USB_UART_BLE );
 
     void init_NTP_Time(char* ntpServer_="pool.ntp.org", long gmtOffset_sec_=0, int daylightOffset_sec=3600, long NTP_request_interval_=64000);
 
-    void add_wifi_network( String ssid, String password);
+    bool add_wifi_network( String ssid, String password);
     void clear_wifi_networks();
     int getNumberWIFIconfigured();
     void setNumberWIFIconfigured(uint8_t num);

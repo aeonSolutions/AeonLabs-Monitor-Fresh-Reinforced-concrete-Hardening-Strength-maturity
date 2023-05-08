@@ -43,11 +43,10 @@ GEO_LOCATION_CLASS::GEO_LOCATION_CLASS(){
 }
 
 // **********************************************
-void GEO_LOCATION_CLASS::init(INTERFACE_CLASS* interface,  M_WIFI_CLASS* mWifi, mSerial* mserial ){
+void GEO_LOCATION_CLASS::init(INTERFACE_CLASS* interface, mSerial* mserial ){
   this->mserial=mserial;
   this->mserial->printStr("init GeoLocation ...");
   this->interface=interface;
-  this-> mWifi = mWifi;
   this->ErrMsgShown=false;
   
   this->REQUEST_DELTA_TIME  = 10*60*1000; // 10 min 
@@ -89,10 +88,6 @@ bool GEO_LOCATION_CLASS::get_ip_geo_location_data(String ipAddress , bool overri
 
   if ( override==false && ( ( millis() - this->$espunixtimePrev) < this->REQUEST_DELTA_TIME) )
     return false;
-
-  if (WiFi.status() != WL_CONNECTED){
-    this->mWifi->start(10000, 5); // TTL , n attempts 
-  }   
   
   if (WiFi.status() != WL_CONNECTED ){
     if (this->ErrMsgShown == false){
@@ -134,7 +129,6 @@ bool GEO_LOCATION_CLASS::get_ip_geo_location_data(String ipAddress , bool overri
       this->mserial->printStrln("Http error " + String(httpResponseCode) );
     }
 
-    this->mWifi->resumePowerSavingMode();
     return false;
   }
   
@@ -167,7 +161,6 @@ bool GEO_LOCATION_CLASS::get_ip_geo_location_data(String ipAddress , bool overri
       
       interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
       interface->onBoardLED->statusLED(100, 1);
-      this->mWifi->resumePowerSavingMode();
       return false;
   }else{
     this->interface->requestGeoLocationDateTime= String( this->interface->rtc.getDateTime(true) );
@@ -178,7 +171,6 @@ bool GEO_LOCATION_CLASS::get_ip_geo_location_data(String ipAddress , bool overri
   this->ErrMsgShown = false;
   interface->onBoardLED->led[0] = interface->onBoardLED->LED_GREEN;
   interface->onBoardLED->statusLED(100, 1);
-  this->mWifi->resumePowerSavingMode();
   return true;
 }
 
@@ -194,6 +186,7 @@ bool GEO_LOCATION_CLASS::get_ip_geo_location_data(String ipAddress , bool overri
  // *********************************************************
 bool GEO_LOCATION_CLASS::gbrl_commands(String $BLE_CMD, uint8_t sendTo ){
   String dataStr="";
+  
   if($BLE_CMD=="$?"){
     return this->helpCommands(sendTo);
   }

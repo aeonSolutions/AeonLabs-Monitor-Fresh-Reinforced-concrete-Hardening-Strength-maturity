@@ -108,7 +108,13 @@ void MATURITY_CLASS::init(INTERFACE_CLASS* interface, ONBOARD_SENSORS* onBoardSe
     this->signs[7] = "%";
     this->signs[8] = "^";
 
-    this->readSettings();
+    File settingsFile = LittleFS.open("/maturity.cfg", FILE_READ);
+    if (!settingsFile){
+        this->saveSettings();
+    }else{
+        this->readSettings();
+    }
+    settingsFile.close();
     this->mserial->printStrln("done.\n");
 
     this->ProbeSensorStatus(mSerial::DEBUG_BOTH_USB_UART);
@@ -515,9 +521,10 @@ bool MATURITY_CLASS::saveSettings(fs::FS &fs){
     if (fs.exists("/maturity.cfg") )
         fs.remove("/maturity.cfg");
 
-    File settingsFile = fs.open("/storage/maturity.cfg", FILE_WRITE); 
+    File settingsFile = fs.open("/maturity.cfg", FILE_WRITE); 
     if ( !settingsFile ){
         this->mserial->printStrln( this->interface->DeviceTranslation("err_create_mat_settings") + ".");
+        settingsFile.close();
         return false;
     }
 
@@ -529,19 +536,20 @@ bool MATURITY_CLASS::saveSettings(fs::FS &fs){
     settingsFile.close();
     return true;
 }
+// --------------------------------------------------------------------
 
 bool MATURITY_CLASS::readSettings(fs::FS &fs){    
     File settingsFile = fs.open("/maturity.cfg", FILE_READ);
     if (!settingsFile){
         this->mserial->printStrln( this->interface->DeviceTranslation("err_notfound_mat_settings")  + ".");
+        settingsFile.close();
         return false;
     }
     if (settingsFile.size() == 0){
         this->mserial->printStrln( this->interface->DeviceTranslation("err_invalid_mat_settings") + ".");
+        settingsFile.close();
         return false;    
     }
-
-    File settingsFile2 = fs.open("/maturity.cfg", FILE_READ);
 
     String temp= settingsFile.readStringUntil(';');
     this->config.custom_maturity_equation_is_summation = *(temp.c_str()) != '0';
@@ -561,7 +569,7 @@ bool MATURITY_CLASS::readSettings(fs::FS &fs){
         return false;
 
     String dataStr="Concrete Curing GBRL Commands:\n" \
-                    "$pt                 - "+ this->interface->DeviceTranslation("pr") +"\n" \
+                    "$pt                 - "+ this->interface->DeviceTranslation("pt") +"\n" \
                     "$probe status       - "+ this->interface->DeviceTranslation("probe_status") +"\n" \
                     "$st                 - "+ this->interface->DeviceTranslation("st") +"\n" \
                     "$ma                 - "+ this->interface->DeviceTranslation("ma") +"\n" \

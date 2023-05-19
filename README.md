@@ -74,6 +74,11 @@ If you like this smart device pcb electronics and /or its firmware C++ code cons
 
 ### ![](https://github.com/aeonSolutions/AeonLabs-WIFI-BLE-RFID-NFC-Desk-Contacless-Reader-Writer/blob/main/designs/working_green.png) Status
   Fully working.
+  
+  <p align="center">
+<img src="https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/blob/main/media/testing_phase_alpha.jpg" height="300">
+
+</p>
 
 [May 7, 2023] - The firmware 1.0.14 for Over the Air Updates is now released to the public. Goto the [releases](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/releases) section to learn more.  
 

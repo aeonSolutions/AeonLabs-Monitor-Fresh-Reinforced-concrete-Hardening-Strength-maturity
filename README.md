@@ -88,6 +88,13 @@ If you like this smart device pcb electronics and /or its firmware C++ code cons
 
 <br>
 
+## OEM Firmware code
+The OEM version of the firmware code can be found on the folder **firmware code**.  It has by default OTA updates, meaning the smart concrete curing device automatically updates it self when newer updated versions made available here.  
+
+This code uses my own ESP32 c++ class libraties to expedite development of code of ESP32 microcontrollers. The repository is located [here](https://github.com/aeonSolutions/aeonlabs-ESP32-C-Base-Firmware-Libraries#readme) for anyone to use.
+
+<br>
+
 ### Now selling on Tindie.com
 
 | [<img src="https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/blob/main/tindie_sell.png" alt="" height="60">](https://www.tindie.com/stores/aeonlabs/) | To all those not into electronics and still liked and want to own any of the listed PCB for smart devices can buy the PRO version on Tindie ready to install and use. |

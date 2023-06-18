@@ -414,7 +414,7 @@ if (millis() - beacon > 10000){
 
       interface->setMCUclockFrequency( interface->MIN_MCU_FREQUENCY);
       interface->CURRENT_CLOCK_FREQUENCY = interface->MIN_MCU_FREQUENCY;
-      interface->setBLEconnectivityStatus(false);
+      mWifi->setBLEconnectivityStatus(false);
 
       interface->onBoardLED->led[0] = interface->onBoardLED->LED_RED;
       interface->onBoardLED->led[1] = interface->onBoardLED->LED_GREEN;

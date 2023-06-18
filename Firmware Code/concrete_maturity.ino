@@ -424,7 +424,7 @@ if (millis() - beacon > 10000){
 // ................................................................................
 
   eTime = millis() - prevMeasurementMillis;
-  if ( interface->getBLEconnectivityStatus()==false && interface->LIGHT_SLEEP_EN && maturity->Measurments_EN==true) {
+  if ( mWifi->getBLEconnectivityStatus()==false && interface->LIGHT_SLEEP_EN && maturity->Measurments_EN==true) {
     if (eTime < maturity->config.MEASUREMENT_INTERVAL ){
       mserial->printStr("Entering light sleep....");
       interface->onBoardLED->turnOffAllStatusLED();
@@ -456,7 +456,7 @@ if ( (millis() - statusTime > 10000) && maturity->Measurments_EN == true ){ //10
     dataStr += String(char(10) + String(char(10)) );
     
     bool sendTo= mSerial::DEBUG_BOTH_USB_UART;
-    if (interface->getBLEconnectivityStatus() )
+    if (mWifi->getBLEconnectivityStatus() )
       sendTo = mSerial::DEBUG_ALL_USB_UART_BLE;      
     
     interface->sendBLEstring( dataStr, sendTo);
@@ -465,7 +465,7 @@ if ( (millis() - statusTime > 10000) && maturity->Measurments_EN == true ){ //10
   
   // ................................................................................
 
- dataverse->UploadToDataverse(interface->getBLEconnectivityStatus());
+ dataverse->UploadToDataverse(mWifi->getBLEconnectivityStatus());
  // ................................................................................    
 
   if (mserial->readSerialData()){

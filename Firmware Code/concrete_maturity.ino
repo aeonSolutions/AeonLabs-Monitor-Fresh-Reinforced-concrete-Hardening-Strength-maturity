@@ -130,7 +130,7 @@ String valueReceived="";
 
 class MyServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
-      mwifi->setBLEconnectivityStatus (true);
+      mWifi->setBLEconnectivityStatus (true);
       mserial->printStr("BLE connection init ", mserial->DEBUG_BOTH_USB_UART);
       
       interface->onBoardLED->led[0] = interface->onBoardLED->LED_BLUE;

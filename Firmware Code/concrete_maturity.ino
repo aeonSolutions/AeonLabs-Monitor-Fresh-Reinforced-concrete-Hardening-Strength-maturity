@@ -130,7 +130,7 @@ String valueReceived="";
 
 class MyServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
-      interface->setBLEconnectivityStatus (true);
+      mwifi->setBLEconnectivityStatus (true);
       mserial->printStr("BLE connection init ", mserial->DEBUG_BOTH_USB_UART);
       
       interface->onBoardLED->led[0] = interface->onBoardLED->LED_BLUE;
@@ -146,7 +146,7 @@ class MyServerCallbacks: public BLEServerCallbacks {
     }
 
     void onDisconnect(BLEServer* pServer) {
-      interface->setBLEconnectivityStatus (false);
+      mWifi->setBLEconnectivityStatus (false);
       
       interface->onBoardLED->led[0] = interface->onBoardLED->LED_BLUE;
       interface->onBoardLED->statusLED(100, 0.5);
@@ -189,7 +189,7 @@ class pCharacteristicRX_Callbacks: public BLECharacteristicCallbacks {
       }
       
       $BLE_CMD = rxValue;
-      interface->setBLEconnectivityStatus(true);
+      mWifi->setBLEconnectivityStatus(true);
       
       xSemaphoreTake(MemLockSemaphoreBLE_RX, portMAX_DELAY); 
         newCMDarrived=true; // this needs to be the last line       
@@ -403,7 +403,7 @@ if (millis() - beacon > 10000){
 
 // ............................................................................. 
   // disconnected for at least 3min
-  if (  interface->getBLEconnectivityStatus()==false && ( millis() - mWifi->$espunixtimeDeviceDisconnected > 180000) && interface->CURRENT_CLOCK_FREQUENCY >= interface->WIFI_FREQUENCY){
+  if (  mWifi->getBLEconnectivityStatus()==false && ( millis() - mWifi->$espunixtimeDeviceDisconnected > 180000) && interface->CURRENT_CLOCK_FREQUENCY >= interface->WIFI_FREQUENCY){
       mserial->printStrln("setting min MCU freq.");
       btStop();
       //BLEDevice::deinit(); // crashes the device

@@ -14,6 +14,9 @@
 
 
 # Smart Concrete Curing Monitor Device
+buy on [Tindie.com](https://www.tindie.com/products/aeonlabs/smart-concrete-strength-monitor/) or on [Gumroad.com](https://3455782655596.gumroad.com/l/smartconcretemonitor)
+
+<br>
 
 **The problem**
 

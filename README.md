@@ -28,7 +28,15 @@ This smart device is able to do active monitoring of fresh concrete at any const
 
 Alternatively, when is required LIVE remote access to the concrete data, this smart device is capable of LIVE experimental data measurements with a **unique FingerPrint ID** configured to do measurements and upload directly to an open data repository, such as a [dataverse](https://dataverse.org).
 
-<br>
+
+_____________________________________________________________________________________________
+If you prefer, can read this project on ....
+
+- Autodesk's Intructables.com website, [here](https://www.instructables.com/Smart-Power-Switch-Outlet/)
+- Hackster.io website [here](https://www.hackster.io/mtpsilva).
+- Medium.com webiste [here](https://medium.com/@mtpsilva)
+
+_____________________________________________________________________________________________
 
 This repo contains instructions on how to assemble a smart PCB able to monitor Fresh Reinforced concrete Hardening to determine concrete maturity and estimate its strength. 
 The smart PCB is a 12-bit smart DAQ. The Kicad project files can be downloaded on this [repository](https://github.com/aeonSolutions/openScienceResearch-Smart-DAQ-Device-able-to-Upload-Live-Experimental-Sensor-Data-to-a-Data-Repo). Those who prefer buying already assembled, ready to deploy and do live monitoring at a construction site can buy at my [Tindie store](https://www.tindie.com/stores/aeonlabs/).  

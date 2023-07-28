@@ -180,10 +180,7 @@ The hardware specifications for the 12bit pcb with dimensions of 54x48mm are the
  
 - Can be powered using a 2 wire LiPo battery with a JST connector or by Micro USB 
 - Connect to all kinds of I2C Temperature and Humidity sensors;
-- Measure voltage in the range of  [0;3.3V]
-- Measure electrical resistance [0; 10^6] Ohm 
 - Do temperature and humidity compensation on all measurements 
-- Has a voltage reference sensor for improved accuracy on ADC measurements  
 - Has a motion sensor to know if anyone moved de smart device from its place
 
 <br>

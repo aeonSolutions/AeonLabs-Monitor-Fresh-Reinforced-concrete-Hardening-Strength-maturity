@@ -38,7 +38,7 @@ If you prefer, can read this project on ....
 
 _____________________________________________________________________________________________
 
-I've created a WhatsApp Chat for aditional support of feedback, join us [here](https://chat.whatsapp.com/FkNC7u83kuy2QRA5sqjBVg) !
+I've created a WhatsApp Chat for aditional support and feedback, join us [here](https://chat.whatsapp.com/FkNC7u83kuy2QRA5sqjBVg) !
 
 <br>
 

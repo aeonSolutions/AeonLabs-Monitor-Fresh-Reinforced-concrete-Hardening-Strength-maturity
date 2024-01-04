@@ -20,7 +20,12 @@ Last update: 30-11-2023
 # Smart Concrete Curing Monitor Device
 buy on [Tindie.com](https://www.tindie.com/products/aeonlabs/smart-concrete-strength-monitor/) or on [Gumroad.com](https://3455782655596.gumroad.com/l/smartconcretemonitor)
 
-<br>
+<p align="left"> 
+ <img height="15" src="https://github.com/aeonSolutions/AeonLabs-WIFI-BLE-RFID-NFC-Desk-Contacless-Reader-Writer/blob/main/designs/working_green.png"> 
+<b>Status:</b>
+ Hardware electronics are Fully tested and working. First 🥇 release of the firmware code is now available. <br>
+&nbsp; Looking for someone available to collaborate on the firmware coding. If you like this project and want faster development, prototyping and testing consider a donation or sponsoring. thank you 🙏.
+ </p>
 
 **The problem**
 

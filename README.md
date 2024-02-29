@@ -44,7 +44,7 @@ If you prefer, can read this project on ....
 
 
 <p align="center">
- <a href="https://aeonsolutions.github.io/poroducts/concretematurity/">
+ <a href="https://aeonsolutions.github.io/products/concretematurity/">
  <img alt="View this repository in a conventional landing page" height="100" src="https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/blob/main/media/diy_icon.png"></a>
   &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
   <a href="https://aeonsolutions.github.io/products/">

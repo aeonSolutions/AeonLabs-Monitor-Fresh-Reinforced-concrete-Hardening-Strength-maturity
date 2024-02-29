@@ -106,7 +106,7 @@ If you like this smart device pcb electronics and /or its firmware C++ code cons
 ### Hardware Specifications
 
 - ExpressIF single core XTensa LX7 microcontroller (ESP32 C3)
-- Fingerprint ID technology for validation of data power measurments and increased trustworthiness. More information can be found [here](https://github.com/aeonSolutions/openScience-Smart-DAQ-to-Upload-Live-Experimental-Data-to-a-Data-Repository/wiki).
+- Fingerprint ID technology for validation of concrete data with increased trustworthiness. More information can be found [here](https://github.com/aeonSolutions/openScience-Smart-DAQ-to-Upload-Live-Experimental-Data-to-a-Data-Repository/wiki).
 - Power consumption of only 60nA when in standy
 - USB-C connectivity with Serial UART
 - 2.4GHz Wireless Radio (WWIFI, BLutooth and all others)

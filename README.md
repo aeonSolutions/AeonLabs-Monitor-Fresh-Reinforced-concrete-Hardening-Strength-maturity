@@ -104,7 +104,7 @@ If you like this smart device pcb electronics and /or its firmware C++ code cons
 - Power consumption of only 60nA when in standy
 - USB-C connectivity with Serial UART
 - 2.4GHz Wireless Radio (WWIFI, BLutooth and all others)
-- 
+
 ### ![](https://github.com/aeonSolutions/AeonLabs-WIFI-BLE-RFID-NFC-Desk-Contacless-Reader-Writer/blob/main/designs/working_green.png) Status
   Fully working.
   

@@ -69,6 +69,12 @@ This smart device has the ATSHA204A chip a SHA-256 high-security hardware authen
  <img  width="45%" src="https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/media/smart_concrete_monitor.jpg">
 </p>
 
+<p align="center">
+<strong> <a href="https://aeonsolutions.github.io/sponsor/concretematurity/">Interactive view of the PCB Layout</a> </strong> &nbsp;
+  <strong> <a href="https://aeonsolutions.github.io/sponsor/concretematurity/circuit_schematic.html">Interactive view of the circuit schematic</a> </strong> <br>
+ <sup>Click to view the latest revision</sup>
+</p>
+
 The proposed assembly solution utilizes a LiPo 2000mAh battery and is able to monitor, in regular intraday intervals, and send data to a nearby edge server using WIFI or Bluetooth BLE for more than one month without requiring a recharge. Other smart device setup solutions are possible. For instance, the one with a LiPo battery is suitable for embedding the smart device inside the concrete element itself one wants to do monitoring. Is also possible to embed the sensor probe into the fresh concrete while the smart DAQ enclosure is placed at the surface of the concrete element. Depending on power availability the smart DAQ has a built-in micro USB plug able to connect to any USB smartphone or tablet charger.
 
 
@@ -176,32 +182,6 @@ Check the [wiki](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinfor
 - & more...
 
 <br />
-<br>
-
-### Smart PCB Hardware Specifications 
-The hardware specifications for the 12bit pcb with dimensions of 54x48mm are the following:
-
-- QFN 56 Dual Xtensa LX7 Core Processors running up to 240MHz
-  -	RISC V ultra-low power co-processor
-  - 512Kb RAM;
-  - 8Mb SOIC 8 NOR SPI Flash Memory;
-  - 2.4GHz ISM wireless connectivity;
-  - 1x 12-16bit ADC Multiplexed DAQ channels;
-- Authentication & Security:
-  - SOIC-8 ATSHA204A SHA-256 high-security hardware authentication IC for secure and unique communication between devices;
-- Power management
-  - DFN-6 AUR9718 high efficiency step-down 3.3V 1.5A DC converter;
-- Onboard sensors:
-  - DFN-8 SHT3.x; temperature sensor with a precision of 1.5C;
-  - DFN-8 SHT3.x humidity sensor;
-  - LGA-14 LSM6DS3 a 6-axis accelerometer and gyroscope;
-  - reference voltage sensor calibration with temperature and humidity
-- 	External connectivity:
-  -  1x I2C pin terminal connector (shared)
-  -  1x 12 to 16bit (oversampling & digitization) digital terminal connector (shared)
-
-
-<br>
 <br>
 
  **In real life this smart DAQ is able to:**

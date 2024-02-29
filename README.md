@@ -1,8 +1,5 @@
-[Main Catalogue](https://github.com/aeonSolutions/PCB-Prototyping-Catalogue) >> 
-[Construction Industry](https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/tree/main/Construction%20Industry)  >>  [Construction Site](https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/tree/main/Construction%20Industry/Construction%20Site)   >>  Smart Concrete Curing Device
 
-[![Telegram](https://img.shields.io/badge/join-telegram-blue.svg?style=for-the-badge)](https://t.me/+W4rVVa0_VLEzYmI0)
- [![WhatsApp](https://img.shields.io/badge/join-whatsapp-green.svg?style=for-the-badge)](https://chat.whatsapp.com/FkNC7u83kuy2QRA5sqjBVg) 
+[![](https://dcbadge.vercel.app/api/server/HY4h6UTC) ](https://discord.gg/nYe9YMKf)
  [![Donate](https://img.shields.io/badge/donate-$-brown.svg?style=for-the-badge)](http://paypal.me/mtpsilva)
  [![Say Thanks](https://img.shields.io/badge/Say%20Thanks-!-yellow.svg?style=for-the-badge)](https://saythanks.io/to/mtpsilva)
 ![](https://img.shields.io/github/last-commit/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity?style=for-the-badge)
@@ -11,6 +8,9 @@
 </a>
 ![](https://views.whatilearened.today/views/github/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity.svg)
 
+[Main Catalogue](https://github.com/aeonSolutions/PCB-Prototyping-Catalogue) >> 
+[Construction Industry](https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/tree/main/Construction%20Industry)  >>  [Construction Site](https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/tree/main/Construction%20Industry/Construction%20Site)   >>  Smart Concrete Curing Device
+
 
 <p align="right">
  <a href="https://github-com.translate.goog/aeonSolutions/PCB-Prototyping-Catalogue/tree/main?_x_tr_sl=en&_x_tr_tl=pt&_x_tr_hl=en&_x_tr_pto=wapp">Change Language</a> <br>
@@ -18,7 +18,7 @@ Last update: 29-02-2024
 </p>
 
 # Smart Concrete Curing Monitor Device
-buy on [Tindie.com](https://www.tindie.com/products/aeonlabs/smart-concrete-strength-monitor/) or on [Gumroad.com](https://3455782655596.gumroad.com/l/smartconcretemonitor)
+buy on [Tindie.com](https://www.tindie.com/products/aeonlabs/smart-concrete-strength-monitor/).
 
 <p align="left"> 
  <img height="15" src="https://github.com/aeonSolutions/AeonLabs-WIFI-BLE-RFID-NFC-Desk-Contacless-Reader-Writer/blob/main/designs/working_green.png"> 
@@ -38,16 +38,22 @@ This smart device is able to do active monitoring of fresh concrete at any const
 Alternatively, when is required LIVE remote access to the concrete data, this smart device is capable of LIVE data measurements with a **unique FingerPrint ID** (more info [here](https://github.com/aeonSolutions/openScience-Smart-DAQ-to-Upload-Live-Experimental-Data-to-a-Data-Repository/wiki/Validation-of-Experimental-Data-Origins:-A-Swarm-of-DAQ-devices-able-to-Deliver-Unique-Experimental-Data-using-Blockchain‐like-Fingerprint-ID-to-a-Data-Repository)) and upload directly to an open data repository, such as a [dataverse](https://dataverse.org). This is an important feature when considering,  for instance, **casess of legal dispute of concrete quality**.
 
 
-_____________________________________________________________________________________________
 If you prefer, can read this project on ....
-
-- Autodesk's Intructables.com website, [here](https://www.instructables.com/Smart-Power-Switch-Outlet/)
 - Hackster.io website [here](https://www.hackster.io/mtpsilva).
 - Medium.com webiste [here](https://medium.com/@mtpsilva)
 
-_____________________________________________________________________________________________
 
-I've created a WhatsApp Chat for aditional support and feedback, join us [here](https://chat.whatsapp.com/FkNC7u83kuy2QRA5sqjBVg) !
+<p align="center">
+ <a href="https://aeonsolutions.github.io/poroducts/concretematurity/">
+ <img alt="View this repository in a conventional landing page" height="100" src="https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/blob/main/media/diy_icon.png"></a>
+  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+  <a href="https://aeonsolutions.github.io/products/">
+  <img alt="View all open hardware solutions ready to buy, install and use" height="100" src="https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/blob/main/media/pcb_icon.png">
+ </a> <br>
+ <sup>View this repository in a conventional landing page</sup>
+  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+ <sup> View all open hardware solutions ready to buy, install and use</sup>
+</p>
 
 <br>
 

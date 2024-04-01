@@ -61,7 +61,7 @@ If you prefer, can read this project on ....
  </a> <br>
  <sup>View this repository in a conventional landing page</sup>
   &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
- <sup> View all open hardware solutions ready to buy, install and use</sup>
+ <sup> View all open hardware solutions ready to buy, install, and use</sup>
 </p>
 
 <br>
@@ -69,7 +69,7 @@ If you prefer, can read this project on ....
 This repo contains instructions on how to assemble a smart PCB able to monitor Fresh Reinforced concrete Hardening to determine concrete maturity and estimate its strength. 
 The smart PCB is a 12-bit smart DAQ. The Kicad project files can be downloaded on this [repository](https://github.com/aeonSolutions/openScienceResearch-Smart-DAQ-Device-able-to-Upload-Live-Experimental-Sensor-Data-to-a-Data-Repo). Those who prefer buying already assembled, ready to deploy and do live monitoring at a construction site can buy at my [Tindie store](https://www.tindie.com/stores/aeonlabs/).  
 
-Nowadays there are many sensors that can be connected for this monitoring task. The most common for this kind of applications are the Sensorion SHt3x, and the Maxim Integrated DS18B20 (see part list below).
+Nowadays there are many sensors that can be connected for this monitoring task. The most common for this kind of application are the Sensorion SHt3x, and the Maxim Integrated DS18B20 (see part list below).
 
 This smart device has the ATSHA204A chip a SHA-256 high-security hardware authentication IC for secure and unique data exchange and communication between the smart DAQ and the Edge server.
 
@@ -96,8 +96,8 @@ The proposed assembly solution utilizes a LiPo 2000mAh battery and is able to mo
 <br>
 
 <p align="center">
-If you like this smart device pcb electronics and /or its firmware C++ code consider supporting this project with a one time domation. <br>
- Links bellow at the bottom and on the rigth side pane. <br>
+If you like this smart device's pcb electronics and /or its firmware C++ code consider supporting this project with a one-time donation. <br>
+ Links below at the bottom and on the right side pane. <br>
  Thank you.
 </p>
 
@@ -122,9 +122,10 @@ If you like this smart device pcb electronics and /or its firmware C++ code cons
 
 - ExpressIF single core XTensa LX7 microcontroller (ESP32 C3)
 - Fingerprint ID technology for validation of concrete data with increased trustworthiness. More information can be found [here](https://github.com/aeonSolutions/openScience-Smart-DAQ-to-Upload-Live-Experimental-Data-to-a-Data-Repository/wiki).
-- Power consumption of only 60nA when in standy
+- Power consumption of only 60nA when on standby
 - USB-C connectivity with Serial UART
 - 2.4GHz Wireless Radio (WWIFI, BLutooth and all others)
+- this hardware electronics is "CE Ready" meaning it is ready to get a CE marking
 
 ### ![](https://github.com/aeonSolutions/AeonLabs-WIFI-BLE-RFID-NFC-Desk-Contacless-Reader-Writer/blob/main/designs/working_green.png) Status
   Fully working.
@@ -143,9 +144,9 @@ If you like this smart device pcb electronics and /or its firmware C++ code cons
 <br>
 
 ## OEM Firmware code
-The OEM version of the firmware code can be found on the folder **firmware code**.  It has by default OTA updates, meaning the smart concrete curing device automatically updates it self when newer updated versions made available here.  
+The OEM version of the firmware code can be found in the folder **firmware code**.  It has by default OTA updates, meaning the smart concrete curing device automatically updates itself when newer updated versions are made available here.  
 
-This code uses my own ESP32 c++ class libraries to expedite development of code of ESP32 microcontrollers. The repository is located [here](https://github.com/aeonSolutions/aeonlabs-ESP32-C-Base-Firmware-Libraries#readme) for anyone to use.
+This code uses my own ESP32 C++ class libraries to expedite the development of code for ESP32 microcontrollers. The repository is located [here](https://github.com/aeonSolutions/aeonlabs-ESP32-C-Base-Firmware-Libraries#readme) for anyone to use.
 
 <br>
 
@@ -195,16 +196,16 @@ Check the [wiki](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinfor
 
  **In real life this smart DAQ is able to:**
  
-- Can be powered using a 2 wire LiPo battery with a JST connector or by Micro USB 
+- Can be powered using a 2-wire LiPo battery with a JST connector or by Micro USB 
 - Connect to all kinds of I2C Temperature and Humidity sensors;
 - Do temperature and humidity compensation on all measurements 
-- Has a motion sensor to know if anyone moved de smart device from its place
+- Has a motion sensor to know if anyone moved the smart device from its place
 
 <br>
 <br>
 
 ## PCB Gerber files
-The PCB gerber files are located in the folder "gerber" and are ready to order online on any pcb fabrication store. (PCBWay, AllPCB, Eurocircuits, etc)
+The PCB Gerber files are located in the folder "Gerber" and are ready to order online at any PCB fabrication store. (PCBWay, AllPCB, Eurocircuits, etc)
 
 <br>
 
@@ -260,7 +261,7 @@ Make a donation on PayPal and get a TAX refund*.
 </p>
 
 ### Support all these open hardware projects and become a GitHub sponsor  
-Liked any of my PCB KiCad Designs? Help and Support my open work to all by becoming a GitHub sponsor.
+Did you like any of my PCB KiCad Designs? Help and Support my open work to all by becoming a GitHub sponsor.
 
 <p align="center">
     <a href="https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/blob/main/become_a_sponsor/aeonlabs-github-sponsorship-agreement.docx">

@@ -24,13 +24,13 @@ buy on [Tindie.com](https://www.tindie.com/products/aeonlabs/smart-concrete-stre
  <img height="15" src="https://github.com/aeonSolutions/AeonLabs-WIFI-BLE-RFID-NFC-Desk-Contacless-Reader-Writer/blob/main/designs/working_green.png"> 
 <b>Status:</b>
  Hardware electronics are Fully tested and working. The first 🥇 release of the firmware code is now available. <br>
-&nbsp; Looking for someone available to collaborate on the firmware coding. If you like this project and want faster development, prototyping and testing consider a donation or sponsoring. thank you 🙏.
+&nbsp; Looking for someone available to collaborate on the firmware coding. If you like this project and want faster development, prototyping, and testing consider a donation or sponsoring. thank you 🙏.
  </p>
 
 <p align="center">
    <img height="100px" src="https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/blob/main/media/CE_READY.png">
 <br>
-this hardware electronics is "CE Ready" meaning it is ready to get a CE marking 
+this hardware electronics is "CE Ready" meaning it is ready to get a CE marking. To learn more about this marking go to [Wikipedia here](https://en.wikipedia.org/wiki/CE_marking). 
 </p>
 
 # 

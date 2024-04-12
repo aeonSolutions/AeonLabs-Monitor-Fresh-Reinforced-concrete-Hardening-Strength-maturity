@@ -221,8 +221,8 @@ Check the [wiki](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinfor
 <br>
 <br>
 
-## PCB Gerber files
-The PCB Gerber files are located in the folder "Gerber" and are ready to order online at any PCB fabrication store. (PCBWay, AllPCB, Eurocircuits, etc)
+## PCB  Files
+The PCB Files can be found on the web interactive viewer. Links below. 
 
 <br>
 

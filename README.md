@@ -105,8 +105,8 @@ The proposed assembly solution utilizes a LiPo 2000mAh battery and is able to mo
   -  Power level meter
 
 -  Connectivity
-  - Wireless 2.4 GHz  (WIFI, Bluetooth, Zigbee, Matter, etc )
-  - Data Fingerprint ID for communications 
+   - Wireless 2.4 GHz  (WIFI, Bluetooth, Zigbee, Matter, etc )
+   - Data Fingerprint ID for communications 
 
 - USB-C connection 
    - for firmware updates / upgrades

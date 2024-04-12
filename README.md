@@ -216,6 +216,13 @@ The PCB Gerber files are located in the folder "Gerber" and are ready to order o
 
 </p>
 
+<p align="center">
+<strong> <a href="https://aeonsolutions.github.io/sponsor/concretematurity/">Interactive view of the PCB Layout</a> </strong> &nbsp;
+  <strong> <a href="https://aeonsolutions.github.io/sponsor/concretematurity/circuit_schematic.html">Interactive view of the circuit schematic</a> </strong> <br>
+ <sup>Click to view the latest revision</sup>
+</p>
+
+
 <br />
 <br />
 

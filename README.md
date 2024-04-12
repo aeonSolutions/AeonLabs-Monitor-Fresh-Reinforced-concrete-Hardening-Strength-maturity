@@ -210,9 +210,9 @@ The PCB Gerber files are located in the folder "Gerber" and are ready to order o
 <br>
 
 <p align="center">
-<img src="https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/designs/pcb_front.png" width="350">
+<img src="https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/media/pcb_back.jpg" width="45%">
 
-<img src="https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/designs/pcb_back.png" width="350">
+<img src="https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/media/pcb_front.jpg" width="45%">
 
 </p>
 

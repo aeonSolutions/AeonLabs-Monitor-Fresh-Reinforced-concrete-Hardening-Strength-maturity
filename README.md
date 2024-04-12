@@ -95,11 +95,29 @@ The proposed assembly solution utilizes a LiPo 2000mAh battery and is able to mo
 
 <br>
 
-<p align="center">
-If you like this smart device's pcb electronics and /or its firmware C++ code consider supporting this project with a one-time donation. <br>
- Links below at the bottom and on the right side pane. <br>
- Thank you.
-</p>
+# Hardware Functionalities
+- 2x Channel Ports
+- 1x ADC Channel - it can connect to the DS18B20 temperature sensor sold on AliExpress
+
+- Advanced Power Management 
+  - 2x Connectors for 4.2V Lithium Polymer Batteries
+  - 1x 5.0V USB-C  connector
+  -  Power level meter
+
+-  Connectivity
+  - Wireless 2.4 GHz  (WIFI, Bluetooth, Zigbee, Matter, etc )
+  - Data Fingerprint ID for communications 
+
+- USB-C connection 
+   - for firmware updates / upgrades
+   - installation of a custom firmware possible ( tunning)
+   - for local troubleshooting or errors on the device
+ 
+# Compatible Sensors 
+The Smart Construction Device can connect to all kinds of sensors. For instance:
+- The DS18B20 Temperature sold on AliExpress
+
+- Built-in motion sensor, to alert if anyone moves or touches the device
 
 <br>
 

@@ -18,14 +18,7 @@ Last update: 01-04-2024
 </p>
 
 # Smart Concrete Curing Monitor Device
-buy on [Tindie.com](https://www.tindie.com/products/aeonlabs/smart-concrete-strength-monitor/).
-
-<p align="left"> 
- <img height="15" src="https://github.com/aeonSolutions/AeonLabs-WIFI-BLE-RFID-NFC-Desk-Contacless-Reader-Writer/blob/main/designs/working_green.png"> 
-<b>Status:</b>
- Hardware electronics are Fully tested and working. The first 🥇 release of the firmware code is now available. <br>
-&nbsp; Looking for someone available to collaborate on the firmware coding. If you like this project and want faster development, prototyping, and testing consider a donation or sponsoring. thank you 🙏.
- </p>
+<sup> <img height="15" src="https://github.com/aeonSolutions/AeonLabs-WIFI-BLE-RFID-NFC-Desk-Contacless-Reader-Writer/blob/main/designs/working_green.png">  **status: <a href="https://en.wikipedia.org/wiki/Minimum_viable_product">M.V.P.</a>** NOW SELLING on <a href="https://www.tindie.com/stores/aeonlabs/">Tindie.com</a>  </sup> <br>
 
 <p align="center">
    <img height="100px" src="https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/blob/main/media/CE_READY.png">

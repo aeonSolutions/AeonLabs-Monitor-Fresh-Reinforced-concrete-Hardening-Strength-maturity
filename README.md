@@ -57,7 +57,7 @@ This smart device is able to do active monitoring of fresh concrete at any const
 Alternatively, when is required LIVE remote access to the concrete data, this smart device is capable of LIVE data measurements with a **unique FingerPrint ID** (more info [here](https://github.com/aeonSolutions/openScience-Smart-DAQ-to-Upload-Live-Experimental-Data-to-a-Data-Repository/wiki/Validation-of-Experimental-Data-Origins:-A-Swarm-of-DAQ-devices-able-to-Deliver-Unique-Experimental-Data-using-Blockchain‐like-Fingerprint-ID-to-a-Data-Repository)) and upload directly to an open data repository, such as a [dataverse](https://dataverse.org). This is an important feature when considering,  for instance, **casess of legal dispute of concrete quality**.
 
 
-If you prefer, can read this project on ....
+If you prefer, you can read this project on...
 - Hackster.io website [here](https://www.hackster.io/mtpsilva).
 - Medium.com webiste [here](https://medium.com/@mtpsilva)
 
@@ -77,11 +77,11 @@ If you prefer, can read this project on ....
 <br>
 
 This repo contains instructions on how to assemble a smart PCB able to monitor Fresh Reinforced concrete Hardening to determine concrete maturity and estimate its strength. 
-The smart PCB is a 12-bit smart DAQ. The Kicad project files can be downloaded on this [repository](https://github.com/aeonSolutions/openScienceResearch-Smart-DAQ-Device-able-to-Upload-Live-Experimental-Sensor-Data-to-a-Data-Repo). Those who prefer buying already assembled, ready to deploy and do live monitoring at a construction site can buy at my [Tindie store](https://www.tindie.com/stores/aeonlabs/).  
+The smart PCB is a 12-bit smart DAQ. To buy one already assembled, ready-to-deploy, and do live monitoring at a construction site go to my [Tindie store](https://www.tindie.com/stores/aeonlabs/).  
 
 Nowadays there are many sensors that can be connected for this monitoring task. The most common for this kind of application are the Sensorion SHt3x, and the Maxim Integrated DS18B20 (see part list below).
 
-This smart device has the ATSHA204A chip a SHA-256 high-security hardware authentication IC for secure and unique data exchange and communication between the smart DAQ and the Edge server.
+This smart device has "unique data fingerprint identification" technologies, meaning it can deliver validated sensor-measured values that can be used in scientific research and cases of legal dispute. You can read all about [this technology here](https://github.com/aeonSolutions/openScience-Smart-DAQ-to-Upload-Live-Experimental-Data-to-a-Data-Repository/wiki/Validation-of-Experimental-Data-Origins:-A-Swarm-of-DAQ-devices-able-to-Deliver-Unique-Experimental-Data-using-Blockchain%E2%80%90like-Fingerprint-ID-to-a-Data-Repository)
 
 <p align="center">
 <img  width="45%" src="https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinforced-concrete-Hardening-Strength-maturity/blob/main/designs/smart%20concrete%20maturity%20inside%20transparent%20enclosure.jpeg">
@@ -94,7 +94,7 @@ This smart device has the ATSHA204A chip a SHA-256 high-security hardware authen
  <sup>Click to view the latest revision</sup>
 </p>
 
-The proposed assembly solution utilizes a LiPo 2000mAh battery and is able to monitor, in regular intraday intervals, and send data to a nearby edge server using WIFI or Bluetooth BLE for more than one month without requiring a recharge. Other smart device setup solutions are possible. For instance, the one with a LiPo battery is suitable for embedding the smart device inside the concrete element itself one wants to do monitoring. Is also possible to embed the sensor probe into the fresh concrete while the smart DAQ enclosure is placed at the surface of the concrete element. Depending on power availability the smart DAQ has a built-in micro USB plug able to connect to any USB smartphone or tablet charger.
+The proposed assembly solution utilizes a LiPo 2000mAh battery and is able to monitor, in regular intraday intervals, and send data to a nearby edge server using WIFI or Bluetooth BLE for more than one month without requiring a recharge. Other smart device setup solutions are possible. For instance, the one with a LiPo battery is suitable for embedding the smart device inside the concrete element itself one wants to do the monitoring. Is also possible to embed the sensor probe into the fresh concrete while the smart DAQ enclosure is placed at the surface of the concrete element. Depending on power availability the smart DAQ has a built-in micro USB plug able to connect to any USB smartphone or tablet charger.
 
 
 <p align="center">

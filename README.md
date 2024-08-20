@@ -148,7 +148,7 @@ The Smart Construction Device can connect to all kinds of sensors. For instance:
 ### Hardware Specifications
 
 - ExpressIF single core XTensa LX7 microcontroller (ESP32 C3)
-- Fingerprint ID technology for validation of concrete data with increased trustworthiness. More information can be found [here](https://github.com/aeonSolutions/openScience-Smart-DAQ-to-Upload-Live-Experimental-Data-to-a-Data-Repository/wiki).
+- Fingerprint ID technology is used to validate concrete data with increased trustworthiness. More information can be found [here](https://github.com/aeonSolutions/openScience-Smart-DAQ-to-Upload-Live-Experimental-Data-to-a-Data-Repository/wiki).
 - Power consumption of only 60nA when on standby
 - USB-C connectivity with Serial UART
 - 2.4GHz Wireless Radio (WWIFI, BLutooth and all others)
@@ -176,7 +176,7 @@ The OEM version of the firmware code can be found in the folder **firmware code*
 This code uses my own ESP32 C++ class libraries to expedite the development of code for ESP32 microcontrollers. The repository is located [here](https://github.com/aeonSolutions/aeonlabs-ESP32-C-Base-Firmware-Libraries#readme) for anyone to use.
 
 ## OEM Android App
-The OEM Android app for the Smart Concrete Device can be found in the repository below:
+The OEM Android app for the Smart Concrete Device can be found in the repository below: <br>
 https://github.com/aeonSolutions/AeonLabs-Construction-SmartConcreteApp
 
 <br>
@@ -219,7 +219,7 @@ Check the [wiki](https://github.com/aeonSolutions/AeonLabs-Monitor-Fresh-Reinfor
 - how to assemble one smart PCB concrete maturity device
 - How to buy one on Tindie
 - How to install the firmware code
-- How to use it at any construction site. 
+- How can you use it at any construction site? 
 - & more...
 
 <br />
@@ -280,7 +280,7 @@ See [here](https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/How-t
 <br>
 
 ### Be supportive of my dedication and work towards technology education and buy me a cup of coffee
-The PCB design Files I provide here for anyone to use are free. If you like this Smart Device or use it, please consider buying me a cup of coffee, a slice of pizza or a book to help me study, eat and think new PCB design files.
+The PCB design files I provide here are free. If you like this Smart Device or use it, please consider buying me a cup of coffee, a slice of pizza, or a book to help me study, eat, and think new PCB design files.
 
 <p align="center">
     <a href="https://www.buymeacoffee.com/migueltomas">
@@ -310,8 +310,6 @@ Did you like any of my PCB KiCad Designs? Help and Support my open work to all b
     </a>
 </p>
 
-# 
+## License
 
-### License
-
-Before proceeding to download any of AeonLabs software solutions for open-source development and/or PCB hardware electronics development make sure you are choosing the right license for your project. See [AeonLabs Solutions for Open Hardware & Source Development](https://github.com/aeonSolutions/PCB-Prototyping-Catalogue/wiki/AeonLabs-Solutions-for-Open-Hardware-&-Source-Development) for more information. 
+Before proceeding to download any of AeonLab's open-source code for software solutions and/or open hardware electronics for smart devices and data acquisition make sure you are choosing the right license for your project. See [AeonLabs Solutions for Open Hardware & Open Source Code](https://github.com/aeonSolutions/aeonSolutions/wiki/AeonLabs-Licensing) for more information. For commercial business solutions contact AeonLabs ℹ️ using the contacts above. Thank you 🙏.

@@ -175,6 +175,10 @@ The OEM version of the firmware code can be found in the folder **firmware code*
 
 This code uses my own ESP32 C++ class libraries to expedite the development of code for ESP32 microcontrollers. The repository is located [here](https://github.com/aeonSolutions/aeonlabs-ESP32-C-Base-Firmware-Libraries#readme) for anyone to use.
 
+## OEM Android App
+The OEM Android app for the Smart Concrete Device can be found in the repository below:
+https://github.com/aeonSolutions/AeonLabs-Construction-SmartConcreteApp
+
 <br>
 
 ### Now selling on Tindie.com
